@@ -23,13 +23,14 @@ class Property extends JFrame {
     private int newPeriod;
 
     Property(MainFrame frame) {
+        SetImpacts setImpacts = new SetImpacts(this);
         int height = 700;
         int width = 500;
         this.frame = frame;
         view = frame.view;
         setValues();
         JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(7, 1));
+        mainPanel.setLayout(new GridLayout(8, 1));
         add(mainPanel);
             //set base options
         setVisible(false);
@@ -197,6 +198,10 @@ class Property extends JFrame {
             newPeriod =  value;
         });
         //periodSlider.setPaintLabels(true);
+            //add set impacts button
+        JButton setImpButton = new JButton("Set impacts");
+        mainPanel.add(setImpButton);
+        setImpButton.addActionListener(e-> setImpacts.setVisible(true));
             //add OK and Cancel Buttons
         JPanel okCancelPanel = new JPanel();
         JButton okButton = new JButton("OK");
