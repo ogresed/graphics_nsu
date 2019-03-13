@@ -124,9 +124,16 @@ public class MainFrame extends JFrame {
     private ActionListener openFileListener = e-> loadFile();
     private ActionListener stepListener = e -> view.step();
     private ActionListener clearListener = e -> view.clear();
-    private ActionListener optionListener = e-> property.setVisible(true);
+    private ActionListener optionListener = e-> onOpenOptions();
     private ActionListener aboutListener =  e -> showMessageDialog(this, stringAbout,
             "About Init", JOptionPane.INFORMATION_MESSAGE);
+
+    private void onOpenOptions () {
+        property.setValues();
+        property.setValuesIntoComponents();
+        property.setVisible(true);
+
+    }
 
     private void save(File file) {
         if(file == null)

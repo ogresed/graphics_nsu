@@ -9,7 +9,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 class Property extends JFrame {
-    private View view;
+    View view;
     private MainFrame frame;
 
     JRadioButton xor;
@@ -22,17 +22,28 @@ class Property extends JFrame {
     private int newThickness;
     private int newPeriod;
 
+    private JPanel mainPanel;
+
+    private JSlider horizontallySlider;
+    private JTextField horizontallyField;
+    private JSlider verticallySlider;
+    private JTextField verticallyField;
+    private JSlider radiusSlider;
+    private JTextField radiusField;
+    private JSlider thicknessSlider;
+    private JTextField thicknessField;
+
     Property(MainFrame frame) {
         SetImpacts setImpacts = new SetImpacts(this);
         int height = 700;
         int width = 500;
         this.frame = frame;
         view = frame.view;
-        setValues();
-        JPanel mainPanel = new JPanel();
+        mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(8, 1));
         add(mainPanel);
             //set base options
+        setValues();
         setVisible(false);
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
@@ -62,19 +73,9 @@ class Property extends JFrame {
         modesPanel.add(xorModePanel);
         modesPanel.add(showImpacts);
             //add choice horizontally
-
-        JPanel horizontallyPanel = new JPanel();
-        Border horizontallyPanelBorder = BorderFactory.createTitledBorder("horizontally");
-        horizontallyPanel.setBorder(horizontallyPanelBorder);
-        mainPanel.add(horizontallyPanel);
-        JSlider horizontallySlider = new JSlider(1, 51, newHorizontally);
-        JTextField horizontallyField = new JTextField(String.valueOf(newHorizontally), 4);
-        horizontallyPanel.add(horizontallySlider);
-        horizontallyPanel.add(horizontallyField);
-        horizontallySlider.setMajorTickSpacing(10);
-        horizontallySlider.setPaintTicks(true);
-        horizontallySlider.setPaintLabels(true);
-
+        horizontallySlider = new JSlider(1, 51, newHorizontally);
+        horizontallyField = new JTextField(String.valueOf(newHorizontally), 4);
+        makePanel("horizontally", horizontallyField, horizontallySlider, 10);
         horizontallyField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -90,18 +91,9 @@ class Property extends JFrame {
             newHorizontally = value;
         });
             //add choice vertically
-        JPanel verticallyPanel = new JPanel();
-        Border verticallyPanelBorder = BorderFactory.createTitledBorder("vertically");
-        verticallyPanel.setBorder(verticallyPanelBorder);
-        mainPanel.add(verticallyPanel);
-        JSlider verticallySlider = new JSlider(1, 51, newVertically);
-        JTextField verticallyField = new JTextField(String.valueOf(newVertically), 4);
-        verticallyPanel.add(verticallySlider);
-        verticallyPanel.add(verticallyField);
-        verticallySlider.setMajorTickSpacing(10);
-        verticallySlider.setPaintTicks(true);
-        verticallySlider.setPaintLabels(true);
-
+        verticallySlider = new JSlider(1, 51, newVertically);
+        verticallyField = new JTextField(String.valueOf(newVertically), 4);
+        makePanel("vertically", verticallyField, verticallySlider, 10);
         verticallyField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -117,18 +109,9 @@ class Property extends JFrame {
             newVertically = value;
         });
             //add choice radius
-        JPanel radiusPanel = new JPanel();
-        Border radiusPanelBorder = BorderFactory.createTitledBorder("radius");
-        radiusPanel.setBorder(radiusPanelBorder);
-        mainPanel.add(radiusPanel);
-        JSlider radiusSlider = new JSlider(1, 51, newRadius);
-        JTextField radiusField = new JTextField(String.valueOf(newRadius), 4);
-        radiusPanel.add(radiusSlider);
-        radiusPanel.add(radiusField);
-        radiusSlider.setMajorTickSpacing(10);
-        radiusSlider.setPaintTicks(true);
-        radiusSlider.setPaintLabels(true);
-
+        radiusSlider = new JSlider(1, 51, newRadius);
+        radiusField = new JTextField(String.valueOf(newRadius), 4);
+        makePanel("radius", radiusField, radiusSlider, 10);
         radiusField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -144,18 +127,9 @@ class Property extends JFrame {
             newRadius = value;
         });
             //add choice thickness
-        JPanel thicknessPanel = new JPanel();
-        Border thicknessPanelBorder = BorderFactory.createTitledBorder("thickness");
-        thicknessPanel.setBorder(thicknessPanelBorder);
-        mainPanel.add(thicknessPanel);
-        JSlider thicknessSlider = new JSlider(1, 51, newThickness);
-        JTextField thicknessField = new JTextField(String.valueOf(newThickness), 4);
-        thicknessPanel.add(thicknessSlider);
-        thicknessPanel.add(thicknessField);
-        thicknessSlider.setMajorTickSpacing(10);
-        thicknessSlider.setPaintTicks(true);
-        thicknessSlider.setPaintLabels(true);
-
+        thicknessSlider = new JSlider(1, 51, newThickness);
+        thicknessField = new JTextField(String.valueOf(newThickness), 4);
+        makePanel("thickness", thicknessField, thicknessSlider, 10);
         thicknessField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -171,18 +145,9 @@ class Property extends JFrame {
             newThickness = value;
         });
         //add choice period
-        newPeriod = frame.PERIOD_OF_GAME;
-        JPanel periodPanel = new JPanel();
-        Border periodPanelBorder = BorderFactory.createTitledBorder("period");
-        periodPanel.setBorder(periodPanelBorder);
-        mainPanel.add(periodPanel);
         JSlider periodSlider = new JSlider(200, 3000, newPeriod);
         JTextField periodField = new JTextField(String.valueOf(newPeriod), 4);
-        periodPanel.add(periodSlider);
-        periodPanel.add(periodField);
-        periodSlider.setMinorTickSpacing(400);
-        periodSlider.setPaintTicks(true);
-
+        makePanel("period", periodField, periodSlider, 400);
         periodField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -200,7 +165,9 @@ class Property extends JFrame {
         //periodSlider.setPaintLabels(true);
             //add set impacts button
         JButton setImpButton = new JButton("Set impacts");
-        mainPanel.add(setImpButton);
+        JPanel setImpButtonPanel = new JPanel();
+        setImpButtonPanel.add(setImpButton);
+        mainPanel.add(setImpButtonPanel);
         setImpButton.addActionListener(e-> setImpacts.setVisible(true));
             //add OK and Cancel Buttons
         JPanel okCancelPanel = new JPanel();
@@ -213,11 +180,35 @@ class Property extends JFrame {
         cancelButton.addActionListener(e -> setVisible(false));
     }
 
-    public void setValues() {
+    private void makePanel(String name, JTextField field, JSlider slider, int minorTick) {
+        JPanel jPanel = new JPanel();
+        Border horizontallyPanelBorder = BorderFactory.createTitledBorder(name);
+        jPanel.setBorder(horizontallyPanelBorder);
+        mainPanel.add(jPanel);
+        jPanel.add(slider);
+        jPanel.add(field);
+        slider.setMajorTickSpacing(minorTick);
+        slider.setPaintTicks(true);
+        //slider.setPaintLabels(true);
+    }
+
+    void setValues() {
         newHorizontally = view.getHorizontally();
         newVertically = view.getVertically();
         newRadius = view.getRadius();
         newThickness = view.getThickness();
+        newPeriod = frame.PERIOD_OF_GAME;
+    }
+
+    void setValuesIntoComponents () {
+        horizontallySlider.setValue(newHorizontally);
+        horizontallyField.setText(String.format("%d", newHorizontally));
+        verticallySlider.setValue(newVertically);
+        verticallyField.setText(String.format("%d", newVertically));
+        radiusSlider.setValue(newRadius);
+        radiusField.setText(String.format("%d", newRadius));
+        thicknessSlider.setValue(newThickness);
+        thicknessField.setText(String.format("%d", newThickness));
     }
 
     private int getParsedInteger(String text) {
@@ -235,6 +226,8 @@ class Property extends JFrame {
         if(!view.setParameters(newHorizontally, newVertically, newRadius, newThickness)) {
             view.updateField();
             view.resetImpAndRedraw();
+            view.setPreferredSize(new Dimension(view.getFieldWidth(), view.getFieldHeight()));
+            frame.revalidate();
         }
         setVisible(false);
     }

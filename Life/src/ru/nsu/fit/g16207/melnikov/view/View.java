@@ -1,5 +1,4 @@
 package ru.nsu.fit.g16207.melnikov.view;
-import javafx.util.Pair;
 import ru.nsu.fit.g16207.melnikov.logic.Cell;
 import ru.nsu.fit.g16207.melnikov.logic.Logic;
 
@@ -28,7 +27,7 @@ public class View extends Logic {
     /**
      * algorithm drawing lines of Brasenhem
      * */
-    private void drawBr(int xStart, int yStart, int xEnd, int yEnd, Color color) {
+    private void drawBrasenhem(int xStart, int yStart, int xEnd, int yEnd, Color color) {
         int c = color.getRGB();
         int x, y, pdx, pdy, es, el;
         int dx = xEnd - xStart;
@@ -122,7 +121,7 @@ public class View extends Logic {
         return  new Span(x1, x2, y);
     }
     private void fillSpan(Span span, Color color) {
-        drawBr(span.X1, span.Y, span.X2, span.Y, color);
+        drawBrasenhem(span.X1, span.Y, span.X2, span.Y, color);
     }
 
     private void setSizes() {
@@ -167,7 +166,7 @@ public class View extends Logic {
     }
 
     private void mouseAction(int x, int y) {
-        if(isIntoFolderAndNeedToChangeStateOfCell(x, y)) {
+        if(isIntoFieldAndNeedToChangeStateOfCell(x, y)) {
             //по координатам пикселя высчитываем номер клетки
             double d = Double.MAX_VALUE;
             int a = 0; int b = 0;
@@ -192,7 +191,6 @@ public class View extends Logic {
                 spanFilling(cells[a][b].getX(), cells[a][b].getY(), paintingColor);
             }
             changeState(a,b);
-            //System.out.println(String.format("%d %d", a, b));
         }
     }
 
@@ -225,7 +223,7 @@ public class View extends Logic {
         }
     }
 
-    private boolean isIntoFolderAndNeedToChangeStateOfCell(int x, int y) {
+    private boolean isIntoFieldAndNeedToChangeStateOfCell(int x, int y) {
         try {
             int currentColor = image.getRGB(x,y);
             if(currentColor!=borderColor.getRGB() && searchBorder(x, y)) {
@@ -243,7 +241,6 @@ public class View extends Logic {
         drawField();
         g.drawImage(image,0, 0, null);
         if(showImp &&  radius > 10) {
-            //int i = 0, j = 0;
             for (Cell[] cell : cells) {
                 for (Cell cell1 : cell) {
                     g.setFont(new Font(null, Font.BOLD, 2 * radius / 3));
@@ -265,67 +262,67 @@ public class View extends Logic {
         drawHexes(radius + workedThickness);
         int d = 2* workedThickness;
         int offs = d/2 + workedThickness;
-        int a = offs;
-        int b = offs;
+        int xCoordOfCell = offs;
+        int yCoordOfCell = offs;
         //отрисовка и закраска нечетных строк
         for(int i = 0; i < (vertically + 1)/2; i++) {
             for(int j = 0; j< horizontally; j++) {
-                drawHex(a, b, radius);
-                spanFilling(a - 1,b + radius + workedThickness, borderColor);
-                a+=2* radius + d;
+                drawHex(xCoordOfCell, yCoordOfCell, radius);
+                spanFilling(xCoordOfCell - 1,yCoordOfCell + radius + workedThickness, borderColor);
+                xCoordOfCell+=2* radius + d;
             }
-            a = offs;
-            b += 3 * radius + 3*d/2;
+            xCoordOfCell = offs;
+            yCoordOfCell += 3 * radius + 3*d/2;
         }
         //четные строки
-        a = radius + workedThickness + offs;
-        b = offs + 3* workedThickness /2 + 3* radius /2;
+        xCoordOfCell = radius + workedThickness + offs;
+        yCoordOfCell = offs + 3* workedThickness /2 + 3* radius /2;
         for(int i = 0; i < vertically /2; i++) {
             for (int j = 0; j < horizontally - 1; j++) {
-                drawHex(a, b, radius);
-                spanFilling(a - 1, b + radius + workedThickness, borderColor);
-                a += 2 * radius + d;
+                drawHex(xCoordOfCell, yCoordOfCell, radius);
+                spanFilling(xCoordOfCell - 1, yCoordOfCell + radius + workedThickness, borderColor);
+                xCoordOfCell += 2 * radius + d;
             }
-            a = radius + workedThickness + offs;
-            b += 3 * radius + 3 * d / 2;
+            xCoordOfCell = radius + workedThickness + offs;
+            yCoordOfCell += 3 * radius + 3 * d / 2;
         }
     }
 
     private void drawHexes(int radius) {
         int num = vertically / 2 + vertically % 2;
         int offs = workedThickness < 3 ? 0 : workedThickness;
-        int a = offs;
-        int b = offs;
+        int xCoordOfCell = offs;
+        int yCoordOfCell = offs;
         for (int i = 0; i < num; i++) {
             for (int j = 0; j < horizontally; j++) {
-                drawHex(a, b, radius);
-                a += 2 * radius;
+                drawHex(xCoordOfCell, yCoordOfCell, radius);
+                xCoordOfCell += 2 * radius;
             }
-            a = offs;
-            b += 3 * radius;
+            xCoordOfCell = offs;
+            yCoordOfCell += 3 * radius;
         }
-        a = radius + offs;
-        b = 2 * radius + offs;
+        xCoordOfCell = radius + offs;
+        yCoordOfCell = 2 * radius + offs;
         for (int i = 0; i < num - vertically % 2; i++) {
             for (int j = 0; j < horizontally; j++) {
-                drawBr(a, b, a, b + radius, borderColor);
-                a += 2 * radius;
+                drawBrasenhem(xCoordOfCell, yCoordOfCell, xCoordOfCell, yCoordOfCell + radius, borderColor);
+                xCoordOfCell += 2 * radius;
             }
-            a = radius + offs;
-            b += 3 * radius;
+            xCoordOfCell = radius + offs;
+            yCoordOfCell += 3 * radius;
         }
         if (vertically % 2 == 0) {
-            a = radius + offs;
-            b = (3 * radius * (vertically - 1)) / 2 + offs;
+            xCoordOfCell = radius + offs;
+            yCoordOfCell = (3 * radius * (vertically - 1)) / 2 + offs;
             for (int i = 0; i < horizontally - 1; i++) {
-                draw2Lines(a, b, radius);
-                a += 2 * radius;
+                draw2Lines(xCoordOfCell, yCoordOfCell, radius);
+                xCoordOfCell += 2 * radius;
             }
         }
     }
     private void draw2Lines(int x, int y, int r) {
-        drawBr(x + 2 * r, y + 3 * r / 2, x + r, y + 2 * r, borderColor);
-        drawBr(x + r, y + 2 * r, x, y + 3 * r / 2, borderColor);
+        drawBrasenhem(x + 2 * r, y + 3 * r / 2, x + r, y + 2 * r, borderColor);
+        drawBrasenhem(x + r, y + 2 * r, x, y + 3 * r / 2, borderColor);
     }
     /**
      *
@@ -338,12 +335,12 @@ public class View extends Logic {
      передается точка .(х,у) - начало координат для каждого шестигранника
      */
     private void drawHex(int x, int y, int r) {
-        drawBr(x + r, y, x + 2 * r, y + r / 2, borderColor);
-        drawBr(x + 2 * r, y + r / 2, x + 2 * r, y + 3 * r / 2, borderColor);
-        drawBr(x + 2 * r, y + 3 * r / 2, x + r, y + 2 * r, borderColor);
-        drawBr(x + r, y + 2 * r, x, y + 3 * r / 2, borderColor);
-        drawBr(x, y + 3 * r / 2, x, y + r / 2, borderColor);
-        drawBr(x, y + r / 2, x + r, y, borderColor);
+        drawBrasenhem(x + r, y, x + 2 * r, y + r / 2, borderColor);
+        drawBrasenhem(x + 2 * r, y + r / 2, x + 2 * r, y + 3 * r / 2, borderColor);
+        drawBrasenhem(x + 2 * r, y + 3 * r / 2, x + r, y + 2 * r, borderColor);
+        drawBrasenhem(x + r, y + 2 * r, x, y + 3 * r / 2, borderColor);
+        drawBrasenhem(x, y + 3 * r / 2, x, y + r / 2, borderColor);
+        drawBrasenhem(x, y + r / 2, x + r, y, borderColor);
     }
 
     public void clear() {
@@ -435,7 +432,7 @@ public class View extends Logic {
             int tmpRadius = Integer.parseInt(line[0].split(" ")[0]); if(tmpRadius < 5) throw new WrongValueException();
             line = stringsWithoutSpaces(scanner.nextLine());
             int n = Integer.parseInt(line[0].split(" ")[0]);
-            ArrayList<Pair<Integer, Integer>> pairs = new ArrayList<>(n);
+            ArrayList<Span> pairs = new ArrayList<>(n);
             int x; int y;
             while (n!=0 && scanner.hasNextLine()) {
                 n--;
@@ -444,8 +441,8 @@ public class View extends Logic {
                 x = Integer.parseInt(c[1]);
                 y = Integer.parseInt(c[0]);
                 if((x >= 0 && x <=(tmpVertically-1)) && (y >= 0 && y <=(tmpHorizontally - x%2 - 1))) {
-                    Pair<Integer, Integer> pair = new Pair<>(x, y);
-                    pairs.add(pair);
+                    Span span = new Span(x, 0, y);
+                    pairs.add(span);
                 } else {
                     System.out.println("Wrong cell");
                     return;
@@ -455,9 +452,9 @@ public class View extends Logic {
             setParameters(tmpHorizontally, tmpVertically, tmpRadius, tmpThickness);
             updateField();
 
-            for(Pair<Integer, Integer> pair : pairs) {
-                spanFilling(cells[pair.getKey()][pair.getValue()].getX(), cells[pair.getKey()][pair.getValue()].getY(), paintingColor);
-                cells[pair.getKey()][pair.getValue()].setLife();
+            for(Span pair : pairs) {
+                spanFilling(cells[pair.X1][pair.Y].getX(), cells[pair.X1][pair.Y].getY(), paintingColor);
+                cells[pair.X1][pair.Y].setLife();
                 numberOfAliveCells++;
             }
             resetImpAndRedraw();

@@ -154,4 +154,13 @@ public class Logic extends JPanel {
     public int getNumberOfAliveCells() {
         return numberOfAliveCells;
     }
+
+    public void setImpacts(double lb, double le, double bb, double be, double fi, double si) {
+        LIVE_BEGIN = lb;
+        LIVE_END = le;
+        BIRTH_BEGIN = bb;
+        BIRTH_END = be;
+        FST_IMPACT = fi;
+        SND_IMPACT = si;
+    }
 }

@@ -26,22 +26,19 @@ class SetImpacts extends JFrame {
         setBounds((dimension.width - width) / 2, (dimension.height - height) / 2, width, height);
 
         JLabel info = new JLabel(""); mainPanel.add(info);
-        JPanel lbPanel = new JPanel(); mainPanel.add(lbPanel);
-        JPanel lePanel = new JPanel(); mainPanel.add(lePanel);
-        JPanel bbPanel = new JPanel(); mainPanel.add(bbPanel);
-        JPanel bePanel = new JPanel(); mainPanel.add(bePanel);
-        JPanel fiPanel = new JPanel(); mainPanel.add(fiPanel);
-        JPanel siPanel = new JPanel(); mainPanel.add(siPanel);
+        JPanel lifeBeginPanel = new JPanel(); mainPanel.add(lifeBeginPanel);
+        JPanel lifeEndPanel = new JPanel(); mainPanel.add(lifeEndPanel);
+        JPanel birthBeginPanel = new JPanel(); mainPanel.add(birthBeginPanel);
+        JPanel birthEbdPanel = new JPanel(); mainPanel.add(birthEbdPanel);
+        JPanel firstImpPanel = new JPanel(); mainPanel.add(firstImpPanel);
+        JPanel secondImpPanel = new JPanel(); mainPanel.add(secondImpPanel);
         JPanel okCancelPanel = new JPanel(); mainPanel.add(okCancelPanel);
 
-        JLabel lbLabel = new JLabel("Life begin");
-        JTextField lbfield = new JTextField(String.valueOf(NEW_LIVE_BEGIN), 6);
-        lbPanel.add(lbLabel);
-        lbPanel.add(lbfield);
-        lbfield.addKeyListener(new KeyAdapter() {
+        JTextField lifeBeginField = createField("Life being", lifeBeginPanel, NEW_LIVE_BEGIN);
+        lifeBeginField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                double value = getParsedInteger(lbfield.getText());
+                double value = getParsedInteger(lifeBeginField.getText());
                 double tmp = NEW_LIVE_BEGIN;
                 NEW_LIVE_BEGIN = value;
                 if(isCorrectValues()) {
@@ -54,14 +51,11 @@ class SetImpacts extends JFrame {
             }
         });
 
-        JLabel leLabel = new JLabel("Life end");
-        JTextField lefield = new JTextField(String.valueOf(NEW_LIVE_END), 6);
-        lePanel.add(leLabel);
-        lePanel.add(lefield);
-        lefield.addKeyListener(new KeyAdapter() {
+        JTextField lifeEndField = createField("Life End", lifeEndPanel, NEW_LIVE_END);
+        lifeEndField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                double value = getParsedInteger(lefield.getText());
+                double value = getParsedInteger(lifeEndField.getText());
                 double tmp = NEW_LIVE_END;
                 NEW_LIVE_END = value;
                 if (isCorrectValues()) {
@@ -73,15 +67,11 @@ class SetImpacts extends JFrame {
             }
         });
 
-
-        JLabel bbLabel = new JLabel("Birth begin");
-        JTextField bbfield = new JTextField(String.valueOf(NEW_BIRTH_BEGIN), 6);
-        bbPanel.add(bbLabel);
-        bbPanel.add(bbfield);
-        bbfield.addKeyListener(new KeyAdapter() {
+        JTextField birthBeginField = createField("Birth begin", birthBeginPanel, NEW_BIRTH_BEGIN);
+        birthBeginField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                double value = getParsedInteger(bbfield.getText());
+                double value = getParsedInteger(birthBeginField.getText());
                 double tmp = NEW_BIRTH_BEGIN;
                 NEW_BIRTH_BEGIN = value;
                 if(isCorrectValues()) {
@@ -94,14 +84,11 @@ class SetImpacts extends JFrame {
             }
         });
 
-        JLabel beLabel = new JLabel("Birth end");
-        JTextField befield = new JTextField(String.valueOf(NEW_BIRTH_END), 6);
-        bePanel.add(beLabel);
-        bePanel.add(befield);
-        befield.addKeyListener(new KeyAdapter() {
+        JTextField birthEndField = createField("Birth End", birthEbdPanel, NEW_BIRTH_END);
+        birthEndField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                double value = getParsedInteger(befield.getText());
+                double value = getParsedInteger(birthEndField.getText());
                 double tmp = NEW_BIRTH_END;
                 NEW_BIRTH_END = value;
                 if(isCorrectValues()) {
@@ -114,27 +101,20 @@ class SetImpacts extends JFrame {
             }
         });
 
-        JLabel fiLabel = new JLabel("First impact");
-        JTextField fifield = new JTextField(String.valueOf(NEW_FST_IMPACT), 6);
-        fiPanel.add(fiLabel);
-        fiPanel.add(fifield);
-        fifield.addKeyListener(new KeyAdapter() {
+        JTextField firstImpField = createField("First impact", firstImpPanel, NEW_FST_IMPACT);
+        firstImpField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                double value = getParsedInteger(fifield.getText());
-                NEW_FST_IMPACT = value;
+                NEW_FST_IMPACT = getParsedInteger(firstImpField.getText());
             }
         });
 
-        JLabel siLabel = new JLabel("Second impact");
-        JTextField sifield = new JTextField(String.valueOf(NEW_SND_IMPACT), 6);
-        siPanel.add(siLabel);
-        siPanel.add(sifield);
-        sifield.addKeyListener(new KeyAdapter() {
+
+        JTextField secImpField = createField("Second impact", secondImpPanel, NEW_SND_IMPACT);
+        addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                double value = getParsedInteger(sifield.getText());
-                NEW_SND_IMPACT = value;
+                NEW_SND_IMPACT = getParsedInteger(secImpField.getText());
             }
         });
 
@@ -147,8 +127,16 @@ class SetImpacts extends JFrame {
         cancelButton.addActionListener(e->setVisible(false));
     }
 
+    private JTextField createField (String name, JPanel panel, double beginVal) {
+        JLabel label = new JLabel(name);
+        JTextField field = new JTextField(String.valueOf(beginVal), 6);
+        panel.add(label);
+        panel.add(field);
+        return  field;
+    }
+
     private boolean isCorrectValues() {
-        return !((NEW_LIVE_BEGIN <= NEW_BIRTH_BEGIN) && (NEW_BIRTH_BEGIN <=NEW_LIVE_END) && (NEW_BIRTH_BEGIN <= NEW_BIRTH_BEGIN));
+        return ((NEW_LIVE_BEGIN <= NEW_BIRTH_BEGIN) && (NEW_BIRTH_BEGIN <=NEW_LIVE_END) && (NEW_BIRTH_BEGIN <= NEW_BIRTH_BEGIN));
     }
 
     private double getParsedInteger(String text) {
