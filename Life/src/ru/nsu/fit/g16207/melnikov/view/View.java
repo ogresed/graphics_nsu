@@ -448,10 +448,8 @@ public class View extends Logic {
                     return;
                 }
             }
-
             setParameters(tmpHorizontally, tmpVertically, tmpRadius, tmpThickness);
             updateField();
-
             for(Span pair : pairs) {
                 spanFilling(cells[pair.X1][pair.Y].getX(), cells[pair.X1][pair.Y].getY(), paintingColor);
                 cells[pair.X1][pair.Y].setLife();

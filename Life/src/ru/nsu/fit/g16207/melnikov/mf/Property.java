@@ -176,7 +176,7 @@ class Property extends JFrame {
         okCancelPanel.add(okButton);
         okCancelPanel.add(cancelButton);
         mainPanel.add(okCancelPanel);
-        okButton.addActionListener(e -> onOk());
+        okButton.addActionListener(e -> onOkey());
         cancelButton.addActionListener(e -> setVisible(false));
     }
 
@@ -219,7 +219,7 @@ class Property extends JFrame {
         }
     }
 
-    private void onOk() {
+    private void onOkey() {
         if(frame.XORSelected == replace.isSelected()) frame.XOR();
         if(frame.showImpactsSelected != showImpacts.isSelected()) frame.showImpacts();
         frame.PERIOD_OF_GAME = newPeriod;
