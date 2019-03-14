@@ -136,7 +136,7 @@ class SetImpacts extends JFrame {
     }
 
     private boolean isCorrectValues() {
-        return ((NEW_LIVE_BEGIN <= NEW_BIRTH_BEGIN) && (NEW_BIRTH_BEGIN <=NEW_LIVE_END) && (NEW_BIRTH_BEGIN <= NEW_BIRTH_BEGIN));
+        return ((NEW_LIVE_BEGIN <= NEW_BIRTH_BEGIN) && (NEW_BIRTH_BEGIN <=NEW_BIRTH_END) && (NEW_BIRTH_END <= NEW_LIVE_END));
     }
 
     private double getParsedInteger(String text) {
