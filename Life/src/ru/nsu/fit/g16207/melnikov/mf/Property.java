@@ -9,6 +9,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 class Property extends JFrame {
+    private static final char ARROW = 65535;
     View view;
     private MainFrame frame;
 
@@ -79,9 +80,13 @@ class Property extends JFrame {
         horizontallyField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
+                if(arrowPressed(e.getKeyChar()) || horizontallyField.getText().equals("")) {
+                    return;
+                }
                 int value = getParsedInteger(horizontallyField.getText());
                 if(value < 1) value = 1; else if(value > 51) value = 51;
                 horizontallySlider.setValue(value);
+                horizontallyField.setText(String.valueOf(value));
                 newHorizontally = value;
             }
         });
@@ -97,8 +102,12 @@ class Property extends JFrame {
         verticallyField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
+                if(arrowPressed(e.getKeyChar()) || verticallyField.getText().equals("")) {
+                    return;
+                }
                 int value = getParsedInteger(verticallyField.getText());
                 if(value < 1) value = 1; else if(value > 51) value = 51;
+                verticallyField.setText(String.valueOf(value));
                 verticallySlider.setValue(value);
                 newVertically = value;
             }
@@ -109,14 +118,19 @@ class Property extends JFrame {
             newVertically = value;
         });
             //add choice radius
-        radiusSlider = new JSlider(1, 51, newRadius);
-        radiusField = new JTextField(String.valueOf(newRadius), 4);
+        radiusSlider = new JSlider(7, 42, newRadius);
+        radiusField = new JTextField(String.valueOf(newRadius), 5);
         makePanel("radius", radiusField, radiusSlider, 10);
         radiusField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
+                if(arrowPressed(e.getKeyChar()) || radiusField.getText().equals("")) {
+                    return;
+                }
+                char E =  e.getKeyChar();
                 int value = getParsedInteger(radiusField.getText());
-                if(value < 1) value = 1; else if(value > 51) value = 51;
+                if(value <= 7) value = 7; else if(value > 42) value = 42;
+                radiusField.setText(String.valueOf(value));
                 radiusSlider.setValue(value);
                 newRadius = value;
             }
@@ -127,14 +141,18 @@ class Property extends JFrame {
             newRadius = value;
         });
             //add choice thickness
-        thicknessSlider = new JSlider(1, 51, newThickness);
+        thicknessSlider = new JSlider(1, 20, newThickness);
         thicknessField = new JTextField(String.valueOf(newThickness), 4);
-        makePanel("thickness", thicknessField, thicknessSlider, 10);
+        makePanel("thickness", thicknessField, thicknessSlider, 4);
         thicknessField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
+                if(arrowPressed(e.getKeyChar()) || thicknessField.getText().equals("")) {
+                    return;
+                }
                 int value = getParsedInteger(thicknessField.getText());
-                if(value < 1) value = 1; else if(value > 51) value = 51;
+                if(value < 1) value = 1; else if(value > 21) value = 21;
+                thicknessField.setText(String.valueOf(value));
                 thicknessSlider.setValue(value);
                 newThickness = value;
             }
@@ -151,8 +169,12 @@ class Property extends JFrame {
         periodField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
+                if(arrowPressed(e.getKeyChar()) || periodField.getText().equals("")) {
+                    return;
+                }
                 int value = getParsedInteger(periodField.getText());
-                if(value < 1) value = 200; else if(value > 3000) value = 3000;
+                if(value < 200) value = 200; else if(value > 3000) value = 3000;
+                periodField.setText(String.valueOf(value));
                 periodSlider.setValue(value);
                 newPeriod =  value;
             }
@@ -176,8 +198,12 @@ class Property extends JFrame {
         okCancelPanel.add(okButton);
         okCancelPanel.add(cancelButton);
         mainPanel.add(okCancelPanel);
-        okButton.addActionListener(e -> onOkey());
+        okButton.addActionListener(e -> onOk());
         cancelButton.addActionListener(e -> setVisible(false));
+    }
+
+    private boolean arrowPressed(char keyChar) {
+        return keyChar == ARROW;
     }
 
     private void makePanel(String name, JTextField field, JSlider slider, int minorTick) {
@@ -219,7 +245,7 @@ class Property extends JFrame {
         }
     }
 
-    private void onOkey() {
+    private void onOk() {
         if(frame.XORSelected == replace.isSelected()) frame.XOR();
         if(frame.showImpactsSelected != showImpacts.isSelected()) frame.showImpacts();
         frame.PERIOD_OF_GAME = newPeriod;

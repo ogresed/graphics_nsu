@@ -22,12 +22,11 @@ public class MainFrame extends JFrame {
     private Property property;
 
     private volatile boolean Run = false;
-    private Thread thread;
 
     private JToggleButton SI;
     boolean showImpactsSelected = false;
 
-    JToggleButton XOR;
+    private JToggleButton XOR;
     boolean XORSelected = false;
 
     private JButton runStopButton;
@@ -36,8 +35,8 @@ public class MainFrame extends JFrame {
 
     public MainFrame() {
         //set start size
-        int height = 600;
-        int width = 900;
+        final int height = 600;
+        final int width = 900;
         //set base options
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
@@ -197,8 +196,8 @@ public class MainFrame extends JFrame {
         else {
             Run = true;
             runStopButton.setIcon(stopIcon);
-            thread = new Thread(()-> {
-                while (Run &&  !view.step()) {
+            Thread thread = new Thread(() -> {
+                while (Run && !view.step()) {
                     try {
                         Thread.sleep(PERIOD_OF_GAME);
                     } catch (InterruptedException g) {
@@ -226,7 +225,6 @@ public class MainFrame extends JFrame {
     private void loadFile() {
         view.load(getOpenFileName());
         view.setPreferredSize(new Dimension(view.getFieldWidth(), view.getFieldHeight()));
-        //property.setValues();
         revalidate();
     }
 

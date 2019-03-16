@@ -125,7 +125,7 @@ public class View extends Logic {
     }
 
     private void setSizes() {
-        workedThickness = thickness < 5 ? 1 : (thickness + 1)/2;
+        //workedThickness = /*thickness < 5 ? 1 : */(thickness + 1)/2;
         fieldHeight = 3*vertically *(radius + thickness)/2 + workedThickness + radius + thickness;//
         fieldWidth = 2*(thickness + radius)*horizontally + workedThickness + radius+thickness;//
         image = new BufferedImage(fieldWidth, fieldHeight, BufferedImage.TYPE_INT_ARGB);//
@@ -181,14 +181,16 @@ public class View extends Logic {
                 }
             }
             //в зависимости от ХОR красим клетку
-            int currentColor = image.getRGB(cells[a][b].getX(), cells[a][b].getY());
+            int xSeed = cells[a][b].getX();
+            int ySeed = cells[a][b].getY();
+            int currentColor = image.getRGB(xSeed, ySeed);
             if(XOR && currentColor == paintingColor.getRGB()) {
                 swapColor();
-                spanFilling(cells[a][b].getX(), cells[a][b].getY(), paintingColor);
+                spanFilling(xSeed, ySeed, paintingColor);
                 swapColor();
             }
             else {
-                spanFilling(cells[a][b].getX(), cells[a][b].getY(), paintingColor);
+                spanFilling(xSeed,ySeed, paintingColor);
             }
             changeState(a,b);
         }
@@ -243,6 +245,7 @@ public class View extends Logic {
         if(showImp &&  radius > 10) {
             for (Cell[] cell : cells) {
                 for (Cell cell1 : cell) {
+                    //drawCentre(Color.RED.getRGB(), cell1);
                     g.setFont(new Font(null, Font.BOLD, 2 * radius / 3));
                     double d = Math.abs(cell1.getImpact());
                     String number = String.format("%.1f",d );
@@ -254,72 +257,167 @@ public class View extends Logic {
     }
 
     private void drawField() {
-        if(workedThickness < 3) {
-            drawHexes(radius);
-            return;
-        }
-        //нарисовать внешние гегсы
-        drawHexes(radius + workedThickness);
+        //draw external hexes
+        drawHexes();
+        //draw internal hexes
         int d = 2* workedThickness;
-        int offs = d/2 + workedThickness;
-        int xCoordOfCell = offs;
-        int yCoordOfCell = offs;
-        //отрисовка и закраска нечетных строк
+        int offset = thickness;
+        int xCoordinateOfCell = offset;
+        int yCoordinateOfCell = offset;
+            //draw odd lines
         for(int i = 0; i < (vertically + 1)/2; i++) {
             for(int j = 0; j< horizontally; j++) {
-                drawHex(xCoordOfCell, yCoordOfCell, radius);
-                spanFilling(xCoordOfCell - 1,yCoordOfCell + radius + workedThickness, borderColor);
-                xCoordOfCell+=2* radius + d;
+                drawHex(xCoordinateOfCell, yCoordinateOfCell, radius);
+                xCoordinateOfCell+=2* radius + d;
             }
-            xCoordOfCell = offs;
-            yCoordOfCell += 3 * radius + 3*d/2;
+            xCoordinateOfCell = offset;
+            yCoordinateOfCell += 3 * radius + 2*d;
         }
-        //четные строки
-        xCoordOfCell = radius + workedThickness + offs;
-        yCoordOfCell = offs + 3* workedThickness /2 + 3* radius /2;
+        //draw even lines
+        xCoordinateOfCell = radius + workedThickness + offset;
+        yCoordinateOfCell = offset + 2* workedThickness + 3* radius /2;
         for(int i = 0; i < vertically /2; i++) {
             for (int j = 0; j < horizontally - 1; j++) {
-                drawHex(xCoordOfCell, yCoordOfCell, radius);
-                spanFilling(xCoordOfCell - 1, yCoordOfCell + radius + workedThickness, borderColor);
-                xCoordOfCell += 2 * radius + d;
+                drawHex(xCoordinateOfCell, yCoordinateOfCell, radius);
+                xCoordinateOfCell += 2 * radius + d;
             }
-            xCoordOfCell = radius + workedThickness + offs;
-            yCoordOfCell += 3 * radius + 3 * d / 2;
+            xCoordinateOfCell = radius + workedThickness + offset;
+            yCoordinateOfCell += 3 * radius + 2 * d;
+        }
+        //filling filed
+        spanFilling(1, thickness + radius, borderColor);
+    }
+
+    private void drawHexes() {
+        int size = radius + thickness;
+        int xCoordinateOfCell = 0;
+        int yCoordinateOfCell = 0;
+        int numberOfOddLines = (vertically + 1)/2;
+        for (int i = 0; i < numberOfOddLines; i++) {
+            for (int j = 0; j < horizontally; j++) {
+                if(i == 0) {
+                    if(j == 0) {
+                        drawHexWithoutRightLow(xCoordinateOfCell, yCoordinateOfCell, size);
+                    } else if (j == horizontally - 1) {
+                        drawHexWithoutLeftLow(xCoordinateOfCell, yCoordinateOfCell, size);
+                    } else {
+                        drawHexWithoutRightAndLeftLow(xCoordinateOfCell, yCoordinateOfCell, size);
+                    }
+                } else if(i == numberOfOddLines - 1) {
+                    if(j == 0) {
+                        drawHexWithoutRightHih(xCoordinateOfCell, yCoordinateOfCell, size);
+                    } else if(j == horizontally - 1) {
+                        drawHexWithoutLeftHih(xCoordinateOfCell, yCoordinateOfCell, size);
+                    } else {
+                        drawHexWithoutLeftRightHih(xCoordinateOfCell, yCoordinateOfCell, size);
+                    }
+                } else if(j == 0) {
+                    drawHexWithoutRightHihLow(xCoordinateOfCell, yCoordinateOfCell, size);
+                } else if(j == horizontally - 1) {
+                    drawHexWithoutLeftHihLow(xCoordinateOfCell, yCoordinateOfCell, size);
+                }
+                xCoordinateOfCell += 2 * size - thickness;
+            }
+            xCoordinateOfCell = 0;
+            yCoordinateOfCell += 3 * size - thickness;
+        }
+        xCoordinateOfCell = size - thickness/2;
+        yCoordinateOfCell = 2 * size - thickness/2;
+        for (int i = 0; i < vertically/2; i++) {
+            for (int j = 0; j < horizontally; j++) {
+                if(j == 0)
+                drawBrasenhem(xCoordinateOfCell, yCoordinateOfCell, xCoordinateOfCell,
+                        yCoordinateOfCell + size, borderColor);
+                if(j == horizontally - 1)
+                drawBrasenhem(xCoordinateOfCell+thickness, yCoordinateOfCell,
+                        xCoordinateOfCell+thickness, yCoordinateOfCell + size, borderColor);
+                xCoordinateOfCell += 2 * size-thickness;
+            }
+            xCoordinateOfCell = size - thickness/2;
+            yCoordinateOfCell += 3 * size - thickness;
+        }
+        if (vertically % 2 == 0) {
+            xCoordinateOfCell = size - thickness/2;
+            yCoordinateOfCell = (3 * size * (vertically - 1)) / 2 - thickness - thickness/2;
+            for (int i = 0; i < horizontally - 1; i++) {
+                draw2Lines(xCoordinateOfCell, yCoordinateOfCell, size);
+                xCoordinateOfCell += 2 * size- thickness;
+            }
         }
     }
 
-    private void drawHexes(int radius) {
-        int num = vertically / 2 + vertically % 2;
-        int offs = workedThickness < 3 ? 0 : workedThickness;
-        int xCoordOfCell = offs;
-        int yCoordOfCell = offs;
-        for (int i = 0; i < num; i++) {
-            for (int j = 0; j < horizontally; j++) {
-                drawHex(xCoordOfCell, yCoordOfCell, radius);
-                xCoordOfCell += 2 * radius;
-            }
-            xCoordOfCell = offs;
-            yCoordOfCell += 3 * radius;
-        }
-        xCoordOfCell = radius + offs;
-        yCoordOfCell = 2 * radius + offs;
-        for (int i = 0; i < num - vertically % 2; i++) {
-            for (int j = 0; j < horizontally; j++) {
-                drawBrasenhem(xCoordOfCell, yCoordOfCell, xCoordOfCell, yCoordOfCell + radius, borderColor);
-                xCoordOfCell += 2 * radius;
-            }
-            xCoordOfCell = radius + offs;
-            yCoordOfCell += 3 * radius;
-        }
-        if (vertically % 2 == 0) {
-            xCoordOfCell = radius + offs;
-            yCoordOfCell = (3 * radius * (vertically - 1)) / 2 + offs;
-            for (int i = 0; i < horizontally - 1; i++) {
-                draw2Lines(xCoordOfCell, yCoordOfCell, radius);
-                xCoordOfCell += 2 * radius;
-            }
-        }
+    private void drawHexWithoutLeftRightHih(int x, int y, int size) {
+        //drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
+        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
+        drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
+        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
+        //drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
+
+    private void drawHexWithoutRightHih(int x, int y, int size) {
+        //drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
+        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
+        drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
+        drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
+    }
+
+    private void drawHexWithoutLeftHih(int x, int y, int size) {
+        drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
+        drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
+        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
+        //drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
+    }
+
+    private void drawHexWithoutLeftHihLow(int x, int y, int size) {
+        drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
+        //drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
+        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
+        //drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
+    }
+
+    private void drawHexWithoutRightHihLow(int x, int y, int size) {
+        //drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
+        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
+        //drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
+        drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
+        drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
+    }
+
+    private void drawHexWithoutLeftLow(int x, int y, int size) {
+        drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
+        //drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
+        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
+        drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
+    }
+
+    private void drawHexWithoutRightAndLeftLow(int x, int y, int size) {
+        drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
+        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
+        //drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
+        //drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
+        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
+        drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
+    }
+
+    private void drawHexWithoutRightLow(int x, int y, int size) {
+        drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
+        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
+        //drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
+        drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
+        drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
+    }
+
     private void draw2Lines(int x, int y, int r) {
         drawBrasenhem(x + 2 * r, y + 3 * r / 2, x + r, y + 2 * r, borderColor);
         drawBrasenhem(x + r, y + 2 * r, x, y + 3 * r / 2, borderColor);
@@ -334,15 +432,14 @@ public class View extends Logic {
      |
      передается точка .(х,у) - начало координат для каждого шестигранника
      */
-    private void drawHex(int x, int y, int r) {
-        drawBrasenhem(x + r, y, x + 2 * r, y + r / 2, borderColor);
-        drawBrasenhem(x + 2 * r, y + r / 2, x + 2 * r, y + 3 * r / 2, borderColor);
-        drawBrasenhem(x + 2 * r, y + 3 * r / 2, x + r, y + 2 * r, borderColor);
-        drawBrasenhem(x + r, y + 2 * r, x, y + 3 * r / 2, borderColor);
-        drawBrasenhem(x, y + 3 * r / 2, x, y + r / 2, borderColor);
-        drawBrasenhem(x, y + r / 2, x + r, y, borderColor);
+    private void drawHex(int x, int y, int size) {
+        drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
+        drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
+        drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
+        drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
-
     public void clear() {
         numberOfAliveCells = 0;
         swapColor();
@@ -365,25 +462,20 @@ public class View extends Logic {
     public int getFieldHeight() {
         return fieldHeight;
     }
-
     public void setXOR() {
         XOR = true;
     }
-
     public void setReplace() {
         XOR = false;
     }
-
     private void swapColor() {
         Color tmp = paintingColor;
         paintingColor = changeableColor;
         changeableColor = tmp;
     }
-
     public void setShowImp(boolean v) {
         showImp = v;
     }
-
     /**
      * if game is over return true, else return false
      * */
@@ -407,17 +499,14 @@ public class View extends Logic {
         resetImpacts();
         return numberOfChangedCells == 0 || numberOfAliveCells == 0;
     }
-
     private String[] stringsWithoutSpaces(String s) {
         return s.replaceAll(" {4}", " "). replaceAll("[\\s]{2,}", " ").split("//");
     }
-
     private class WrongValueException extends Exception {
         WrongValueException() {
             super();
         }
     }
-
     public void load(File file) {
         if(file == null) return;
         try {
@@ -464,7 +553,6 @@ public class View extends Logic {
             System.out.println("Wrong value");
         }
     }
-
     public void updateField() {
         setSizes();
         cellsInitialization();
@@ -482,8 +570,6 @@ public class View extends Logic {
         vertically = newVertically;
         thickness =  newThickness;
         radius = newRadius;
-        if((thickness+1)/2 == 3)
-            radius+=radius%2;
         return ret;
     }
 
