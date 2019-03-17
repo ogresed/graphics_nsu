@@ -13,7 +13,6 @@ import java.util.Scanner;
 import java.util.Stack;
 public class View extends Logic {
     private  static BufferedImage image;
-    private static int workedThickness;
     private static int fieldWidth;// _
     private static int fieldHeight;// |
     private static Color borderColor = new Color(1, 1, 1);
@@ -125,9 +124,8 @@ public class View extends Logic {
     }
 
     private void setSizes() {
-        //workedThickness = /*thickness < 5 ? 1 : */(thickness + 1)/2;
-        fieldHeight = 3*vertically *(radius + thickness)/2 + workedThickness + radius + thickness;//
-        fieldWidth = 2*(thickness + radius)*horizontally + workedThickness + radius+thickness;//
+        fieldHeight = 3*vertically *(radius + thickness)/2 + radius + thickness;//
+        fieldWidth = 2*(thickness + radius)*horizontally + radius+thickness;//
         image = new BufferedImage(fieldWidth, fieldHeight, BufferedImage.TYPE_INT_ARGB);//
     }
 
@@ -249,7 +247,7 @@ public class View extends Logic {
                     g.setFont(new Font(null, Font.BOLD, 2 * radius / 3));
                     double d = Math.abs(cell1.getImpact());
                     String number = String.format("%.1f",d );
-                    g.drawString(number, cell1.getX() - (5* radius /4) / 2, cell1.getY() + (radius + workedThickness) / 2);
+                    g.drawString(number, cell1.getX() - (5* radius /4) / 2, cell1.getY() + (radius + thickness/2) / 2);
                 }
             }
         }
@@ -257,35 +255,70 @@ public class View extends Logic {
     }
 
     private void drawField() {
+        if(thickness == 0) {
+            drawHexesForThickness1();
+            return;
+        }
         //draw external hexes
         drawHexes();
         //draw internal hexes
-        int d = 2* workedThickness;
-        int offset = thickness;
-        int xCoordinateOfCell = offset;
-        int yCoordinateOfCell = offset;
-            //draw odd lines
+        int xCoordinateOfCell = thickness;
+        int yCoordinateOfCell = thickness;
+        //draw odd lines
         for(int i = 0; i < (vertically + 1)/2; i++) {
             for(int j = 0; j< horizontally; j++) {
                 drawHex(xCoordinateOfCell, yCoordinateOfCell, radius);
-                xCoordinateOfCell+=2* radius + d;
+                xCoordinateOfCell+=2* radius + thickness;
             }
-            xCoordinateOfCell = offset;
-            yCoordinateOfCell += 3 * radius + 2*d;
+            xCoordinateOfCell = thickness;
+            yCoordinateOfCell += 3 * radius + 2*thickness;
         }
         //draw even lines
-        xCoordinateOfCell = radius + workedThickness + offset;
-        yCoordinateOfCell = offset + 2* workedThickness + 3* radius /2;
+        xCoordinateOfCell = radius + thickness/2 + thickness;
+        yCoordinateOfCell = thickness + thickness + 3* radius /2;
         for(int i = 0; i < vertically /2; i++) {
             for (int j = 0; j < horizontally - 1; j++) {
                 drawHex(xCoordinateOfCell, yCoordinateOfCell, radius);
-                xCoordinateOfCell += 2 * radius + d;
+                xCoordinateOfCell += 2 * radius + thickness;
             }
-            xCoordinateOfCell = radius + workedThickness + offset;
-            yCoordinateOfCell += 3 * radius + 2 * d;
+            xCoordinateOfCell = radius + thickness /2 + thickness;
+            yCoordinateOfCell += 3 * radius + 2 * thickness;
         }
         //filling filed
         spanFilling(1, thickness + radius, borderColor);
+    }
+
+    private void drawHexesForThickness1() {
+        int num = vertically / 2 + vertically % 2;
+        int offs = 0;//workedThickness < 3 ? 0 : workedThickness;
+        int a = offs;
+        int b = offs;
+        for (int i = 0; i < num; i++) {
+            for (int j = 0; j < horizontally; j++) {
+                drawHex(a, b, radius);
+                a += 2 * radius;
+            }
+            a = offs;
+            b += 3 * radius;
+        }
+        a = radius + offs;
+        b = 2 * radius + offs;
+        for (int i = 0; i < num - vertically % 2; i++) {
+            for (int j = 0; j < horizontally; j++) {
+                drawBrasenhem(a, b, a, b + radius, borderColor);
+                a += 2 * radius;
+            }
+            a = radius + offs;
+            b += 3 * radius;
+        }
+        if (vertically % 2 == 0) {
+            a = radius + offs;
+            b = (3 * radius * (vertically - 1)) / 2 + offs;
+            for (int i = 0; i < horizontally - 1; i++) {
+                draw2Lines(a, b, radius);
+                a += 2 * radius;
+            }
+        }
     }
 
     private void drawHexes() {
@@ -305,10 +338,18 @@ public class View extends Logic {
                     }
                 } else if(i == numberOfOddLines - 1) {
                     if(j == 0) {
-                        drawHexWithoutRightHih(xCoordinateOfCell, yCoordinateOfCell, size);
+                        if(vertically%2 == 1) {
+                            drawHexWithoutRightHih(xCoordinateOfCell, yCoordinateOfCell, size);
+                        } else {
+                            drawHexWithoutRightHihLow(xCoordinateOfCell, yCoordinateOfCell, size);
+                        }
                     } else if(j == horizontally - 1) {
-                        drawHexWithoutLeftHih(xCoordinateOfCell, yCoordinateOfCell, size);
-                    } else {
+                        if(vertically%2 == 1) {
+                            drawHexWithoutLeftHih(xCoordinateOfCell, yCoordinateOfCell, size);
+                        } else {
+                            drawHexWithoutLeftHihLow(xCoordinateOfCell, yCoordinateOfCell, size);
+                        }
+                    } else if(vertically%2 == 1) {
                         drawHexWithoutLeftRightHih(xCoordinateOfCell, yCoordinateOfCell, size);
                     }
                 } else if(j == 0) {
@@ -326,11 +367,11 @@ public class View extends Logic {
         for (int i = 0; i < vertically/2; i++) {
             for (int j = 0; j < horizontally; j++) {
                 if(j == 0)
-                drawBrasenhem(xCoordinateOfCell, yCoordinateOfCell, xCoordinateOfCell,
-                        yCoordinateOfCell + size, borderColor);
+                    drawBrasenhem(xCoordinateOfCell, yCoordinateOfCell, xCoordinateOfCell,
+                            yCoordinateOfCell + size, borderColor);
                 if(j == horizontally - 1)
-                drawBrasenhem(xCoordinateOfCell+thickness, yCoordinateOfCell,
-                        xCoordinateOfCell+thickness, yCoordinateOfCell + size, borderColor);
+                    drawBrasenhem(xCoordinateOfCell+thickness, yCoordinateOfCell,
+                            xCoordinateOfCell+thickness, yCoordinateOfCell + size, borderColor);
                 xCoordinateOfCell += 2 * size-thickness;
             }
             xCoordinateOfCell = size - thickness/2;
@@ -338,7 +379,7 @@ public class View extends Logic {
         }
         if (vertically % 2 == 0) {
             xCoordinateOfCell = size - thickness/2;
-            yCoordinateOfCell = (3 * size * (vertically - 1)) / 2 - thickness - thickness/2;
+            yCoordinateOfCell = (vertically/2-1)*(2*size + radius) + thickness + 3*radius/2;
             for (int i = 0; i < horizontally - 1; i++) {
                 draw2Lines(xCoordinateOfCell, yCoordinateOfCell, size);
                 xCoordinateOfCell += 2 * size- thickness;
@@ -347,17 +388,11 @@ public class View extends Logic {
     }
 
     private void drawHexWithoutLeftRightHih(int x, int y, int size) {
-        //drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
-        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
-        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
-        //drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
 
     private void drawHexWithoutRightHih(int x, int y, int size) {
-        //drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
-        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
         drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
@@ -369,23 +404,15 @@ public class View extends Logic {
         drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
-        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
-        //drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
 
     private void drawHexWithoutLeftHihLow(int x, int y, int size) {
         drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
-        //drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
-        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
-        //drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
 
     private void drawHexWithoutRightHihLow(int x, int y, int size) {
-        //drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
-        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
-        //drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
         drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
         drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
@@ -395,24 +422,16 @@ public class View extends Logic {
         drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
-        //drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
-        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
         drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
 
     private void drawHexWithoutRightAndLeftLow(int x, int y, int size) {
         drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
-        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
-        //drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
-        //drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
-        //drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
         drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
 
     private void drawHexWithoutRightLow(int x, int y, int size) {
         drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
-        //drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
-        //drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
         drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
         drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
@@ -558,19 +577,6 @@ public class View extends Logic {
         cellsInitialization();
         removeAll();
         drawField();
-    }
-
-    public boolean setParameters(int newHorizontally, int newVertically, int newRadius, int newThickness) {
-        boolean ret = horizontally == newHorizontally &&
-                vertically == newVertically &&
-                thickness ==  newThickness &&
-                radius == newRadius;
-
-        horizontally = newHorizontally;
-        vertically = newVertically;
-        thickness =  newThickness;
-        radius = newRadius;
-        return ret;
     }
 
     public void resetImpAndRedraw() {

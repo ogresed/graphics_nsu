@@ -8,7 +8,10 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+import static javax.swing.JOptionPane.showMessageDialog;
+
 class Property extends JFrame {
+    boolean correctValues = false;
     private static final char ARROW = 65535;
     View view;
     private MainFrame frame;
@@ -41,7 +44,7 @@ class Property extends JFrame {
         this.frame = frame;
         view = frame.view;
         mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(8, 1));
+        mainPanel.setLayout(new GridLayout(9, 1));
         add(mainPanel);
             //set base options
         setValues();
@@ -141,7 +144,7 @@ class Property extends JFrame {
             newRadius = value;
         });
             //add choice thickness
-        thicknessSlider = new JSlider(1, 20, newThickness);
+        thicknessSlider = new JSlider(0, 20, newThickness);
         thicknessField = new JTextField(String.valueOf(newThickness), 4);
         makePanel("thickness", thicknessField, thicknessSlider, 4);
         thicknessField.addKeyListener(new KeyAdapter() {
@@ -184,7 +187,10 @@ class Property extends JFrame {
             periodField.setText(String.valueOf(value));
             newPeriod =  value;
         });
-        //periodSlider.setPaintLabels(true);
+            //add info label
+        JPanel infoPanel = new JPanel();
+        JLabel infoLabel = new JLabel("");
+        infoPanel.add(infoLabel);
             //add set impacts button
         JButton setImpButton = new JButton("Set impacts");
         JPanel setImpButtonPanel = new JPanel();
@@ -246,6 +252,11 @@ class Property extends JFrame {
     }
 
     private void onOk() {
+        if(correctValues) {
+            showMessageDialog(this, "Wrong Values",
+                    "About Init", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         if(frame.XORSelected == replace.isSelected()) frame.XOR();
         if(frame.showImpactsSelected != showImpacts.isSelected()) frame.showImpacts();
         frame.PERIOD_OF_GAME = newPeriod;
