@@ -22,23 +22,23 @@ public class Property extends JFrame {
     private final static int maxThickness = 20;
     private final static int minPeriod = 100;
     private final static int maxPeriod = 2900;
-    private  MainFrame frame;
-    private JPanel mainPanel;
-    private JLabel infoLabel;
-    private ChangerValue horizontallyChangerValue;
-    private ChangerValue verticallyChangerValue;
-    private ChangerValue radiusChangerValue;
-    private ChangerValue thicknessChangerValue;
-    private ChangerValue periodChangerValue;
+    private static MainFrame frame;
+    private static JPanel mainPanel;
+    private static JLabel infoLabel;
+    private static ChangerValue horizontallyChangerValue;
+    private static ChangerValue verticallyChangerValue;
+    private static ChangerValue radiusChangerValue;
+    private static ChangerValue thicknessChangerValue;
+    private static ChangerValue periodChangerValue;
     View view;
     public JRadioButton xor;
     public JRadioButton replace;
     public JCheckBox showImpacts;
     public Property(MainFrame frame) {
         SetImpacts setImpacts = new SetImpacts(this);
-        int height = 700;
-        int width = 500;
-        this.frame = frame;
+        int height = 550;
+        int width = 300;
+        Property.frame = frame;
         view = frame.view;
         mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(9, 1));
@@ -50,31 +50,11 @@ public class Property extends JFrame {
         Dimension dimension = toolkit.getScreenSize();
         setBounds((dimension.width - width) / 2, (dimension.height - height) / 2, width, height);
             //create components
-        int newHorizontally = view.getHorizontally();
-        JSlider horizontallySlider = new JSlider(minHorizont, maxHorizont, newHorizontally);
-        JTextField horizontallyField = new JTextField(String.valueOf(newHorizontally), 4);
-        horizontallyChangerValue = new ChangerValue(minHorizont, maxHorizont, newHorizontally,
-                horizontallySlider,horizontallyField);
-        int newVertically = view.getVertically();
-        JSlider verticallySlider = new JSlider(minVertically, maxVertically, newVertically);
-        JTextField verticallyField = new JTextField(String.valueOf(newVertically), 4);
-        verticallyChangerValue = new ChangerValue(minVertically, maxVertically, newVertically,
-                verticallySlider, verticallyField);
-        int newRadius = view.getRadius();
-        JSlider radiusSlider = new JSlider(minRadius, maxRadius, newRadius);
-        JTextField radiusField = new JTextField(String.valueOf(newRadius), 4);
-        radiusChangerValue = new ChangerValue(minRadius, maxRadius, newRadius,
-                radiusSlider, radiusField);
-        int newThickness = view.getThickness();
-        JSlider thicknessSlider = new JSlider(minThickness, maxThickness, newThickness);
-        JTextField thicknessField = new JTextField(String.valueOf(newThickness), 4);
-        thicknessChangerValue = new ChangerValue(minThickness, maxThickness, newThickness,
-                thicknessSlider, thicknessField);
-        int newPeriod = frame.PERIOD_OF_GAME;
-        JSlider periodSlider = new JSlider(minPeriod, maxPeriod, newPeriod);
-        JTextField periodField = new JTextField(String.valueOf(newPeriod), 4);
-        periodChangerValue = new ChangerValue(minPeriod, maxPeriod, newPeriod,
-                periodSlider, periodField);
+        horizontallyChangerValue = makePanelAndCreateChanger("horizontally", 10, view.getHorizontally(), minHorizont, maxHorizont);
+        verticallyChangerValue = makePanelAndCreateChanger("vertically", 10, view.getVertically(), minVertically, maxVertically);
+        radiusChangerValue = makePanelAndCreateChanger("radius", 6, view.getRadius(), minRadius, maxRadius);
+        thicknessChangerValue = makePanelAndCreateChanger("thickness", 4, view.getThickness(), minThickness, maxThickness);
+        periodChangerValue = makePanelAndCreateChanger("period", 200, frame.PERIOD_OF_GAME, minPeriod, maxPeriod);
         setValues();
             //add choice modes
         xor = new JRadioButton("XOR");
@@ -99,51 +79,6 @@ public class Property extends JFrame {
         mainPanel.add(modesPanel);
         modesPanel.add(xorModePanel);
         modesPanel.add(showImpacts);
-            //add choice horizontally
-        makePanel("horizontally", horizontallyField, horizontallySlider, 10);
-        horizontallyField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                checkValueInField(horizontallyChangerValue);
-            }
-        });
-        horizontallySlider.addChangeListener(e-> horizontallyChangerValue.changeSliderValue());
-            //add choice vertically
-        makePanel("vertically", verticallyField, verticallySlider, 10);
-        verticallyField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                checkValueInField(verticallyChangerValue);
-            }
-        });
-        verticallySlider.addChangeListener(e-> verticallyChangerValue.changeSliderValue());
-            //add choice radius
-        makePanel("radius", radiusField, radiusSlider, 6);
-        radiusField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                checkValueInField(radiusChangerValue);
-            }
-        });
-        radiusSlider.addChangeListener(e-> radiusChangerValue.changeSliderValue());
-            //add choice thickness
-        makePanel("thickness", thicknessField, thicknessSlider, 4);
-        thicknessField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                checkValueInField(thicknessChangerValue);
-            }
-        });
-        thicknessSlider.addChangeListener(e-> thicknessChangerValue.changeSliderValue());
-            //add choice period
-        makePanel("period", periodField, periodSlider, 200);
-        periodField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                checkValueInField(periodChangerValue);
-            }
-        });
-        periodSlider.addChangeListener(e-> periodChangerValue.changeSliderValue());
             //add info label
         JPanel infoPanel = new JPanel();
         mainPanel.add(infoPanel);
@@ -165,7 +100,20 @@ public class Property extends JFrame {
         okButton.addActionListener(e -> onOk());
         cancelButton.addActionListener(e -> setVisible(false));
     }
-    private void makePanel(String name, JTextField field, JSlider slider, int minorTick) {
+    private ChangerValue makePanelAndCreateChanger(String name, int minorTick, int value, int min, int max) {
+        JSlider slider = new JSlider(min, max, value);
+        JTextField field = new JTextField(String.valueOf(value), 5);
+        ChangerValue changerValue = new ChangerValue(min, max, value,
+                slider,field);
+        changerValue.setSlider(slider);
+        changerValue.setField(field);
+        field.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                checkValueInField(changerValue);
+            }
+        });
+        slider.addChangeListener(e-> changerValue.changeSliderValue());
         JPanel jPanel = new JPanel();
         Border horizontallyPanelBorder = BorderFactory.createTitledBorder(name);
         jPanel.setBorder(horizontallyPanelBorder);
@@ -174,6 +122,7 @@ public class Property extends JFrame {
         jPanel.add(field);
         slider.setMajorTickSpacing(minorTick);
         slider.setPaintTicks(true);
+        return changerValue;
     }
     private void checkValueInField(ChangerValue changing) {
         int value = getParsedInteger(changing.getField().getText());
@@ -204,7 +153,8 @@ public class Property extends JFrame {
                     "WARNING", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        int sizeOfNewField = view.getNewFieldHeight(verticallyChangerValue.getNewValue(), radiusChangerValue.getNewValue(), thicknessChangerValue.getNewValue()) *
+        int sizeOfNewField =
+                view.getNewFieldHeight(verticallyChangerValue.getNewValue(), radiusChangerValue.getNewValue(), thicknessChangerValue.getNewValue()) *
                 view.getNewFieldWidth(horizontallyChangerValue.getNewValue(), radiusChangerValue.getNewValue(), thicknessChangerValue.getNewValue());
         if(sizeOfNewField > MAX_SIZE_OF_FIELD) {
             showMessageDialog(this, FIELD_TO_LARGE,

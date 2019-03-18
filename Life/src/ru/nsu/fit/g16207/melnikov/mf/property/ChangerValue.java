@@ -14,6 +14,12 @@ class ChangerValue {
         this.slider = slider;
         this.field = field;
     }
+    void setField(JTextField field) {
+        this.field = field;
+    }
+    void setSlider(JSlider slider) {
+        this.slider = slider;
+    }
     void setNewValue(int newValue) {
         this.newValue = newValue;
     }
