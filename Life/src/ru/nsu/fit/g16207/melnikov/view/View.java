@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 public class View extends Logic {
-    private  static BufferedImage image;
+    private BufferedImage image;
     private static int fieldWidth;// _
     private static int fieldHeight;// |
     private static Color borderColor = new Color(1, 1, 1);
@@ -22,7 +22,6 @@ public class View extends Logic {
     private static Color paintingColor = fillingColor;
     private boolean XOR = false;
     private boolean showImp = false;
-
     /**
      * algorithm drawing lines of Brasenhem
      * */
@@ -124,9 +123,9 @@ public class View extends Logic {
     }
 
     private void setSizes() {
-        fieldHeight = 3*vertically *(radius + thickness)/2 + radius + thickness;//
-        fieldWidth = 2*(thickness + radius)*horizontally + radius+thickness;//
-        image = new BufferedImage(fieldWidth, fieldHeight, BufferedImage.TYPE_INT_ARGB);//
+        fieldHeight = getNewFieldHeight(vertically, radius, thickness);
+        fieldWidth = getNewFieldWidth(horizontally, radius, thickness);
+        image = new BufferedImage(fieldWidth, fieldHeight, BufferedImage.TYPE_INT_ARGB);
     }
 
     public View() {
@@ -161,6 +160,14 @@ public class View extends Logic {
                 }
             }
         });
+    }
+
+    public int getNewFieldWidth(int hor, int rad, int thick) {
+        return (hor + 1)*(thick + 2*rad);
+    }
+
+    public int getNewFieldHeight(int vert, int rad, int thick) {
+        return 3*(vert + 1) *(rad + thick)/2 ;
     }
 
     private void mouseAction(int x, int y) {
@@ -234,7 +241,6 @@ public class View extends Logic {
         }
         return false;
     }
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -244,7 +250,7 @@ public class View extends Logic {
             for (Cell[] cell : cells) {
                 for (Cell cell1 : cell) {
                     //drawCentre(Color.RED.getRGB(), cell1);
-                    g.setFont(new Font(null, Font.BOLD, 2 * radius / 3));
+                    g.setFont(new Font(null, Font.ITALIC, 2 * radius / 3));
                     double d = Math.abs(cell1.getImpact());
                     String number = String.format("%.1f",d );
                     g.drawString(number, cell1.getX() - (5* radius /4) / 2, cell1.getY() + (radius + thickness/2) / 2);
@@ -253,7 +259,6 @@ public class View extends Logic {
         }
         repaint();
     }
-
     private void drawField() {
         if(thickness == 0) {
             drawHexesForThickness1();
@@ -535,9 +540,9 @@ public class View extends Logic {
             int tmpHorizontally = Integer.parseInt(mn[0]); if(tmpHorizontally < 1) throw new WrongValueException();
             int tmpVertically = Integer.parseInt(mn[1]); if(tmpVertically < 1) throw new WrongValueException();
             line = stringsWithoutSpaces(scanner.nextLine());
-            int tmpThickness = Integer.parseInt(line[0].split(" ")[0]); if(tmpThickness < 1) throw new WrongValueException();
+            int tmpThickness = Integer.parseInt(line[0].split(" ")[0]); if(tmpThickness < 0) throw new WrongValueException();
             line = stringsWithoutSpaces(scanner.nextLine());
-            int tmpRadius = Integer.parseInt(line[0].split(" ")[0]); if(tmpRadius < 5) throw new WrongValueException();
+            int tmpRadius = Integer.parseInt(line[0].split(" ")[0]); if(tmpRadius < 7) throw new WrongValueException();
             line = stringsWithoutSpaces(scanner.nextLine());
             int n = Integer.parseInt(line[0].split(" ")[0]);
             ArrayList<Span> pairs = new ArrayList<>(n);

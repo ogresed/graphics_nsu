@@ -1,4 +1,6 @@
-package ru.nsu.fit.g16207.melnikov.mf;
+package ru.nsu.fit.g16207.melnikov.mf.property;
+
+import ru.nsu.fit.g16207.melnikov.mf.property.Property;
 
 import javax.swing.*;
 import java.awt.*;

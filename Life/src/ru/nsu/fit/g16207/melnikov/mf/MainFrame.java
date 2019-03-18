@@ -1,5 +1,6 @@
 package ru.nsu.fit.g16207.melnikov.mf;
 import ru.nsu.fit.g16207.melnikov.logic.Cell;
+import ru.nsu.fit.g16207.melnikov.mf.property.Property;
 import ru.nsu.fit.g16207.melnikov.view.View;
 
 import javax.swing.*;
@@ -13,10 +14,10 @@ import static javax.swing.JOptionPane.showMessageDialog;
 import static javax.swing.JOptionPane.showOptionDialog;
 
 public class MainFrame extends JFrame {
-    int PERIOD_OF_GAME = 400;
+    public int PERIOD_OF_GAME = 400;
     private static String stringAbout = "Init, version 1.0\nCopyright" +
             "  2019 Sergey Melnikov, FIT, group 16207";
-    View view;
+    public View view;
     private JMenuBar menuBar;
     private JToolBar toolBar;
     private Property property;
@@ -24,10 +25,10 @@ public class MainFrame extends JFrame {
     private volatile boolean Run = false;
 
     private JToggleButton SI;
-    boolean showImpactsSelected = false;
+    public boolean showImpactsSelected = false;
 
     private JToggleButton XOR;
-    boolean XORSelected = false;
+    public boolean XORSelected = false;
 
     private JButton runStopButton;
     private Icon playIcon;
@@ -160,7 +161,7 @@ public class MainFrame extends JFrame {
         }
     }
 
-    void showImpacts() {
+    public void showImpacts() {
         if(!showImpactsSelected) {
             property.showImpacts.setSelected(true);
             SI.setSelected(true);
@@ -174,7 +175,7 @@ public class MainFrame extends JFrame {
         view.setShowImp(false);
     }
 
-    void XOR() {
+    public void XOR() {
         if(!XORSelected) {
             property.xor.setSelected(true);
             XOR.setSelected(true);
