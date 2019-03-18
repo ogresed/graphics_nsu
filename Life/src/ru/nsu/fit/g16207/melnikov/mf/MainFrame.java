@@ -2,17 +2,14 @@ package ru.nsu.fit.g16207.melnikov.mf;
 import ru.nsu.fit.g16207.melnikov.logic.Cell;
 import ru.nsu.fit.g16207.melnikov.mf.property.Property;
 import ru.nsu.fit.g16207.melnikov.view.View;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-
 import static javax.swing.JOptionPane.showMessageDialog;
 import static javax.swing.JOptionPane.showOptionDialog;
-
 public class MainFrame extends JFrame {
     public int PERIOD_OF_GAME = 400;
     private static String stringAbout = "Init, version 1.0\nCopyright" +
@@ -21,19 +18,14 @@ public class MainFrame extends JFrame {
     private JMenuBar menuBar;
     private JToolBar toolBar;
     private Property property;
-
     private volatile boolean Run = false;
-
     private JToggleButton SI;
     public boolean showImpactsSelected = false;
-
     private JToggleButton XOR;
     public boolean XORSelected = false;
-
     private JButton runStopButton;
     private Icon playIcon;
     private Icon stopIcon;
-
     public MainFrame() {
         //set start size
         final int height = 600;
@@ -51,6 +43,18 @@ public class MainFrame extends JFrame {
         JMenu help = makeMenu("Help", 'H');
         JMenu field = makeMenu("Field", 'D');
         JMenu options = makeMenu("Options", 'P');
+        //make actionListeners
+        ActionListener exitListener = e -> onExit();
+        ActionListener runStopListener = e->runStop();
+        ActionListener XORListener = e -> XOR();
+        ActionListener showImpactsListener = e -> showImpacts();
+        ActionListener saveFileListener = e->save(getSaveFileName());
+        ActionListener openFileListener = e-> loadFile();
+        ActionListener stepListener = e -> view.step();
+        ActionListener clearListener = e -> view.clear();
+        ActionListener optionListener = e-> onOpenOptions();
+        ActionListener aboutListener =  e -> showMessageDialog(this, stringAbout,
+                "About Init", JOptionPane.INFORMATION_MESSAGE);
         //add menu items
         makeMenuItem(file, "Load", openFileListener, 'L', "Load file");
         makeMenuItem(file, "Save", saveFileListener, 'S', "Save file");
@@ -78,16 +82,16 @@ public class MainFrame extends JFrame {
         property = new Property(this);
         //add(property);
         //add buttons
-        makeButton("gifs/exit.gif", exitListener, 'E', "Exit application (Alt + E)");
-        makeButton("gifs/about.gif", aboutListener, 'A', "Shows program version and copyright information (Alt + A)");
-        makeButton("gifs/step.gif", stepListener, 'N', "Next (Alt + N)");
-        makeButton("gifs/clear.gif", clearListener, 'C', "Clear field (Alt + C)");
-        makeButton("gifs/settings.gif", optionListener, 'O', "Set options (Alt + O)");
-        makeButton("gifs/saveFile.gif", saveFileListener, 'S', "Save file(Alt + S)");
-        makeButton("gifs/loadFile.gif", openFileListener, 'L', "Load file (Alt + L)");
+        makeButton("pictures/exit.gif", exitListener, 'E', "Exit application (Alt + E)");
+        makeButton("pictures/about.gif", aboutListener, 'A', "Shows program version and copyright information (Alt + A)");
+        makeButton("pictures/step.gif", stepListener, 'N', "Next (Alt + N)");
+        makeButton("pictures/clear.gif", clearListener, 'C', "Clear field (Alt + C)");
+        makeButton("pictures/settings.gif", optionListener, 'O', "Set options (Alt + O)");
+        makeButton("pictures/saveFile.gif", saveFileListener, 'S', "Save file(Alt + S)");
+        makeButton("pictures/loadFile.gif", openFileListener, 'L', "Load file (Alt + L)");
         //make run/stop button
-        playIcon = new ImageIcon("gifs/play.gif");
-        stopIcon = new ImageIcon("gifs/pause.gif");
+        playIcon = new ImageIcon("pictures/play.gif");
+        stopIcon = new ImageIcon("pictures/pause.gif");
         runStopButton = new JButton();
         runStopButton.setMnemonic('R');
         runStopButton.setToolTipText("Run / stop game (Alt + R)");
@@ -96,45 +100,26 @@ public class MainFrame extends JFrame {
         toolBar.addSeparator();
         toolBar.add(runStopButton);
         //set toggle buttons
-            //set XOR button
-        XOR = new JToggleButton();
-        XOR.setMnemonic('X');
-        XOR.setToolTipText("Set 'XOR' mode (Alt + X)");
-        Icon XOROffIcon = new ImageIcon("gifs/xor.gif");
-        XOR.setIcon(XOROffIcon);
-        XOR.addActionListener(XORListener);
-        toolBar.add(XOR);
-            //set show impacts button
-        SI = new JToggleButton();
-        SI.setMnemonic('W');
-        SI.setToolTipText("Shows impacts (Alt + W)");
-        Icon showImpactOffIcon = new ImageIcon("gifs/show.gif");
-        SI.setIcon(showImpactOffIcon);
-        SI.addActionListener(showImpactsListener);
-        toolBar.add(SI);
+        XOR = makeToggleButton('X', "Set 'XOR' mode (Alt + X)", "pictures/xor.gif", XORListener);
+        SI = makeToggleButton('W', "Shows impacts (Alt + W)", "pictures/show.gif", showImpactsListener);
         //revalidate
         revalidate();
     }
-
-    private ActionListener exitListener = e -> onExit();
-    private ActionListener runStopListener = e->runStop();
-    private ActionListener XORListener = e -> XOR();
-    private ActionListener showImpactsListener = e -> showImpacts();
-    private ActionListener saveFileListener = e->save(getSaveFileName());
-    private ActionListener openFileListener = e-> loadFile();
-    private ActionListener stepListener = e -> view.step();
-    private ActionListener clearListener = e -> view.clear();
-    private ActionListener optionListener = e-> onOpenOptions();
-    private ActionListener aboutListener =  e -> showMessageDialog(this, stringAbout,
-            "About Init", JOptionPane.INFORMATION_MESSAGE);
-
+    private JToggleButton makeToggleButton(char mnemonic, String text, String iconName, ActionListener listener) {
+        JToggleButton  button = new JToggleButton();
+        button.setMnemonic(mnemonic);
+        button.setToolTipText(text);
+        Icon icon = new ImageIcon(iconName);
+        button.setIcon(icon);
+        button.addActionListener(listener);
+        toolBar.add(button);
+        return button;
+    }
     private void onOpenOptions () {
         property.setValues();
         property.setValuesIntoComponents();
         property.setVisible(true);
-
     }
-
     private void save(File file) {
         if(file == null)
             return;
@@ -160,7 +145,6 @@ public class MainFrame extends JFrame {
             System.out.println("File not found");
         }
     }
-
     public void showImpacts() {
         if(!showImpactsSelected) {
             property.showImpacts.setSelected(true);
@@ -174,7 +158,6 @@ public class MainFrame extends JFrame {
         showImpactsSelected = false;
         view.setShowImp(false);
     }
-
     public void XOR() {
         if(!XORSelected) {
             property.xor.setSelected(true);
@@ -188,7 +171,6 @@ public class MainFrame extends JFrame {
         XORSelected = false;
         view.setReplace();
     }
-
     private void runStop() {
         if(Run) {
             Run = false;
@@ -211,7 +193,6 @@ public class MainFrame extends JFrame {
             thread.start();
         }
     }
-
     private void onExit() {
         String[] options = {"Yes", "No"};
         int x =
@@ -222,13 +203,11 @@ public class MainFrame extends JFrame {
         }
         System.exit(0);
     }
-
     private void loadFile() {
         view.load(getOpenFileName());
         view.setPreferredSize(new Dimension(view.getFieldWidth(), view.getFieldHeight()));
         revalidate();
     }
-
     private void makeButton(String icon, ActionListener l, char f, String description) {
         Icon ICon = new ImageIcon(icon);
         JButton button = new JButton(ICon);
@@ -237,25 +216,21 @@ public class MainFrame extends JFrame {
         button.setMnemonic(f);
         button.setToolTipText(description);
     }
-
     private void makeMenuItem(JMenu menu, String s, ActionListener l, char f, String description) {
         JMenuItem item = menu.add(new JMenuItem(s));
         item.addActionListener(l);
         item.setMnemonic(f);
         item.setToolTipText(description);
     }
-
     private JMenu makeMenu(String file, char f) {
         JMenu menu = new JMenu(file);
         menu.setMnemonic(f);
         menuBar.add(menu);
         return  menu;
     }
-
     private File getSaveFileName() {
         return FileUtils.getSaveFileName(this, "txt", "Text file");
     }
-
     private File getOpenFileName() {
         return FileUtils.getOpenFileName(this, "txt", "Text file");
     }
