@@ -1,7 +1,6 @@
 package ru.nsu.fit.g16207.melnikov.view;
 import ru.nsu.fit.g16207.melnikov.logic.Cell;
 import ru.nsu.fit.g16207.melnikov.logic.Logic;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -12,9 +11,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 public class View extends Logic {
+    private static final int MIN_RADIUS_T0_DRAW_IMPACTS = 10;
     private BufferedImage image;
-    private static int fieldWidth;// _
-    private static int fieldHeight;// |
+    private static int fieldWidth;
+    private static int fieldHeight;
     private static Color borderColor = new Color(1, 1, 1);
     private static Color fillingColor = new Color(10, 140, 50);
     private static Color emptyCellColor = new Color(0,0,0,0);
@@ -26,42 +26,42 @@ public class View extends Logic {
      * algorithm drawing lines of Brasenhem
      * */
     private void drawBrasenhem(int xStart, int yStart, int xEnd, int yEnd, Color color) {
-        int c = color.getRGB();
-        int x, y, pdx, pdy, es, el;
+        int colorRGB = color.getRGB();
+        int x, y, xSaveDirection, ySaveDirection, offset, orthogonalDirection;
         int dx = xEnd - xStart;
         int dy = yEnd - yStart;
-        int incX = Integer.compare(dx, 0);
-        int incY = Integer.compare(dy, 0);
+        int xDirection = Integer.compare(dx, 0);
+        int yDirection = Integer.compare(dy, 0);
         dx = Math.abs(dx);
         dy = Math.abs(dy);
         if (dx > dy) {
-            pdx = incX;
-            pdy = 0;
-            es = dy;
-            el = dx;
+            xSaveDirection = xDirection;
+            ySaveDirection = 0;
+            offset = dy;
+            orthogonalDirection = dx;
         }
         else {
-            pdx = 0;
-            pdy = incY;
-            es = dx;
-            el = dy;
+            xSaveDirection = 0;
+            ySaveDirection = yDirection;
+            offset = dx;
+            orthogonalDirection = dy;
         }
         x = xStart;
         y = yStart;
-        int err = el/2;
-        image.setRGB(x, y, c);
-        for (int t = 0; t < el; t++) {
-            err -= es;
+        int err = orthogonalDirection/2;
+        image.setRGB(x, y, colorRGB);
+        for (int t = 0; t < orthogonalDirection; t++) {
+            err -= offset;
             if (err < 0) {
-                err += el;
-                x += incX;
-                y += incY;
+                err += orthogonalDirection;
+                x += xDirection;
+                y += yDirection;
             }
             else {
-                x += pdx;
-                y += pdy;
+                x += xSaveDirection;
+                y += ySaveDirection;
             }
-            image.setRGB(x, y, c);
+            image.setRGB(x, y, colorRGB);
         }
     }
     /**
@@ -102,7 +102,6 @@ public class View extends Logic {
                     X1 = span.X2 + 2;
                 }
             } while (X1 < X2);
-            repaint();
         }
     }
     private Span searchSpan(int x, int y) {
@@ -121,13 +120,11 @@ public class View extends Logic {
     private void fillSpan(Span span, Color color) {
         drawBrasenhem(span.X1, span.Y, span.X2, span.Y, color);
     }
-
     private void setSizes() {
         fieldHeight = getNewFieldHeight(vertically, radius, thickness);
         fieldWidth = getNewFieldWidth(horizontally, radius, thickness);
         image = new BufferedImage(fieldWidth, fieldHeight, BufferedImage.TYPE_INT_ARGB);
     }
-
     public View() {
         setSizes();
         addMouseListener(new MouseAdapter() {
@@ -138,7 +135,6 @@ public class View extends Logic {
                 mouseAction(x, y);
             }
         });
-
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
@@ -161,66 +157,75 @@ public class View extends Logic {
             }
         });
     }
-
-    public int getNewFieldWidth(int hor, int rad, int thick) {
+    private int getNewFieldWidth(int hor, int rad, int thick) {
         return (hor + 1)*(thick + 2*rad);
     }
-
-    public int getNewFieldHeight(int vert, int rad, int thick) {
-        return 3*(vert + 1) *(rad + thick)/2 ;
+    private int getNewFieldHeight(int vent, int rad, int thick) {
+        return 3*(vent + 1) *(rad + thick)/2 ;
     }
-
     private void mouseAction(int x, int y) {
-        if(isIntoFieldAndNeedToChangeStateOfCell(x, y)) {
-            //по координатам пикселя высчитываем номер клетки
-            double d = Double.MAX_VALUE;
-            int a = 0; int b = 0;
+        if(isIntoField(x, y)) {
+            double comparableDistance = Double.MAX_VALUE;
+            int line = 0; int column = 0;
             for(int i = 0; i < vertically; i++) {
                 for(int j = 0; j < horizontally - i%2; j++) {
                     Cell cell = cells[i][j];
-                    double rat = Math.sqrt((cell.getX() - x)*(cell.getX() - x) + (cell.getY() - y)*(cell.getY() - y));
-                    if(rat < d) {
-                        d = rat;
-                        a = i; b = j;
+                    double distance = Math.sqrt((cell.getX() - x)*(cell.getX() - x) + (cell.getY() - y)*(cell.getY() - y));
+                    if(distance < comparableDistance) {
+                        comparableDistance = distance;
+                        line = i; column = j;
                     }
                 }
             }
-            //в зависимости от ХОR красим клетку
-            int xSeed = cells[a][b].getX();
-            int ySeed = cells[a][b].getY();
+            int xSeed = cells[line][column].getX();
+            int ySeed = cells[line][column].getY();
             int currentColor = image.getRGB(xSeed, ySeed);
-            if(XOR && currentColor == paintingColor.getRGB()) {
-                swapColor();
-                spanFilling(xSeed, ySeed, paintingColor);
-                swapColor();
+            if(XOR || currentColor == changeableColor.getRGB()) {
+                if (XOR && currentColor == paintingColor.getRGB()) {
+                    swapColor();
+                    spanFilling(xSeed, ySeed, paintingColor);
+                    swapColor();
+                } else {
+                    spanFilling(xSeed, ySeed, paintingColor);
+                }
+                changeState(line, column);
             }
-            else {
-                spanFilling(xSeed,ySeed, paintingColor);
-            }
-            changeState(a,b);
         }
     }
-
+    private boolean isIntoField(int x, int y) {
+        try {
+            int currentColor = image.getRGB(x,y);
+                return currentColor!=borderColor.getRGB() && searchBorder(x, y);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
+    }
     private boolean searchBorder(int x, int y) {
         int yMin = y < fieldHeight - y ? y : fieldHeight - y;
         int xMin = x < fieldWidth - x ? x : fieldWidth - x;
         int border =  borderColor.getRGB();
         try {
             if (yMin < xMin) {
-                int yBorder = yMin == y ? 0 : fieldHeight;
-                int dir = yBorder == 0 ? -1 : 1;
-                int currentColor = image.getRGB(x, y);
-                while (y != yBorder && currentColor != border) {
-                    y += dir;
-                    currentColor = image.getRGB(x, y);
+                boolean sCase =  checkSpecialCase(x, y);
+                if(!sCase) {
+                    return false;
                 }
-                return currentColor == border;
+                else {
+                    int yBorder = yMin == y ? 0 : fieldHeight;
+                    int direction = yBorder == 0 ? -1 : 1;
+                    int currentColor = image.getRGB(x, y);
+                    while (y != yBorder && currentColor != border) {
+                        y += direction;
+                        currentColor = image.getRGB(x, y);
+                    }
+                    return currentColor == border;
+                }
             } else {
                 int xBorder = xMin == x ? 0 : fieldWidth;
-                int dir = xBorder == 0 ? -1 : 1;
+                int direction = xBorder == 0 ? -1 : 1;
                 int currentColor = image.getRGB(x, y);
                 while (x != xBorder && image.getRGB(x, y) != border) {
-                    x += dir;
+                    x += direction;
                     currentColor = image.getRGB(x, y);
                 }
                 return currentColor == border;
@@ -228,44 +233,39 @@ public class View extends Logic {
         } catch (ArrayIndexOutOfBoundsException e) {
             return false;
         }
-    }
-
-    private boolean isIntoFieldAndNeedToChangeStateOfCell(int x, int y) {
-        try {
-            int currentColor = image.getRGB(x,y);
-            if(currentColor!=borderColor.getRGB() && searchBorder(x, y)) {
-                return XOR || currentColor == changeableColor.getRGB();
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return false;
-        }
-        return false;
     }
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         drawField();
         g.drawImage(image,0, 0, null);
-        if(showImp &&  radius > 10) {
-            for (Cell[] cell : cells) {
-                for (Cell cell1 : cell) {
-                    //drawCentre(Color.RED.getRGB(), cell1);
-                    g.setFont(new Font(null, Font.ITALIC, 2 * radius / 3));
-                    double d = Math.abs(cell1.getImpact());
-                    String number = String.format("%.1f",d );
-                    g.drawString(number, cell1.getX() - (5* radius /4) / 2, cell1.getY() + (radius + thickness/2) / 2);
-                }
-            }
+        if(showImp &&  radius > MIN_RADIUS_T0_DRAW_IMPACTS) {
+            drawImpacts(g);
         }
         repaint();
+    }
+    private void drawImpacts(Graphics g) {
+        for (Cell[] cell : cells) {
+            for (Cell cell1 : cell) {
+                int sizeOfNumbers = 2 * radius / 3;
+                g.setFont(new Font(null, Font.BOLD, sizeOfNumbers));
+                double impact = Math.abs(cell1.getImpact());
+                String number = String.format("%.1f",impact );
+                int xOffsetForDrawImpact = -(5* radius /4) / 2;
+                int yOffsetForDrawImpact = (radius + thickness/2) / 2;
+                int x = cell1.getX() + xOffsetForDrawImpact;
+                int y = cell1.getY() + yOffsetForDrawImpact;
+                g.drawString(number, x, y);
+            }
+        }
     }
     private void drawField() {
         if(thickness == 0) {
             drawHexesForThickness1();
             return;
         }
-        //draw external hexes
-        drawHexes();
+        //draw external border
+        drawExternalBorder();
         //draw internal hexes
         int xCoordinateOfCell = thickness;
         int yCoordinateOfCell = thickness;
@@ -292,156 +292,134 @@ public class View extends Logic {
         //filling filed
         spanFilling(1, thickness + radius, borderColor);
     }
-
-    private void drawHexesForThickness1() {
-        int num = vertically / 2 + vertically % 2;
-        int offs = 0;//workedThickness < 3 ? 0 : workedThickness;
-        int a = offs;
-        int b = offs;
-        for (int i = 0; i < num; i++) {
-            for (int j = 0; j < horizontally; j++) {
-                drawHex(a, b, radius);
-                a += 2 * radius;
-            }
-            a = offs;
-            b += 3 * radius;
-        }
-        a = radius + offs;
-        b = 2 * radius + offs;
-        for (int i = 0; i < num - vertically % 2; i++) {
-            for (int j = 0; j < horizontally; j++) {
-                drawBrasenhem(a, b, a, b + radius, borderColor);
-                a += 2 * radius;
-            }
-            a = radius + offs;
-            b += 3 * radius;
-        }
-        if (vertically % 2 == 0) {
-            a = radius + offs;
-            b = (3 * radius * (vertically - 1)) / 2 + offs;
-            for (int i = 0; i < horizontally - 1; i++) {
-                draw2Lines(a, b, radius);
-                a += 2 * radius;
-            }
-        }
-    }
-
-    private void drawHexes() {
+    private void drawExternalBorder() {
         int size = radius + thickness;
         int xCoordinateOfCell = 0;
         int yCoordinateOfCell = 0;
         int numberOfOddLines = (vertically + 1)/2;
-        for (int i = 0; i < numberOfOddLines; i++) {
-            for (int j = 0; j < horizontally; j++) {
-                if(i == 0) {
-                    if(j == 0) {
-                        drawHexWithoutRightLow(xCoordinateOfCell, yCoordinateOfCell, size);
-                    } else if (j == horizontally - 1) {
-                        drawHexWithoutLeftLow(xCoordinateOfCell, yCoordinateOfCell, size);
-                    } else {
-                        drawHexWithoutRightAndLeftLow(xCoordinateOfCell, yCoordinateOfCell, size);
-                    }
-                } else if(i == numberOfOddLines - 1) {
-                    if(j == 0) {
-                        if(vertically%2 == 1) {
-                            drawHexWithoutRightHih(xCoordinateOfCell, yCoordinateOfCell, size);
-                        } else {
-                            drawHexWithoutRightHihLow(xCoordinateOfCell, yCoordinateOfCell, size);
-                        }
-                    } else if(j == horizontally - 1) {
-                        if(vertically%2 == 1) {
-                            drawHexWithoutLeftHih(xCoordinateOfCell, yCoordinateOfCell, size);
-                        } else {
-                            drawHexWithoutLeftHihLow(xCoordinateOfCell, yCoordinateOfCell, size);
-                        }
-                    } else if(vertically%2 == 1) {
-                        drawHexWithoutLeftRightHih(xCoordinateOfCell, yCoordinateOfCell, size);
-                    }
-                } else if(j == 0) {
-                    drawHexWithoutRightHihLow(xCoordinateOfCell, yCoordinateOfCell, size);
-                } else if(j == horizontally - 1) {
-                    drawHexWithoutLeftHihLow(xCoordinateOfCell, yCoordinateOfCell, size);
-                }
-                xCoordinateOfCell += 2 * size - thickness;
-            }
+        //draw main skeleton
+        drawHexWithoutRightLow(xCoordinateOfCell, yCoordinateOfCell, size);
+        xCoordinateOfCell += 2 * size - thickness;
+        for(int i = 1; i < horizontally - 1; i++) {
+            drawHexWithoutRightAndLeftLow(xCoordinateOfCell, yCoordinateOfCell, size);
+            xCoordinateOfCell += 2 * size - thickness;
+        }
+        drawHexWithoutLeftLow(xCoordinateOfCell, yCoordinateOfCell, size);
+        xCoordinateOfCell = 0;
+        yCoordinateOfCell += 3 * size - thickness;
+        for (int i = 1; i < numberOfOddLines - 1; i++) {
+            drawHexWithoutRightUpperLow(xCoordinateOfCell, yCoordinateOfCell, size);
+            xCoordinateOfCell += (2 * size - thickness) * (horizontally - 1);
+            drawHexWithoutLeftUpperLow(xCoordinateOfCell, yCoordinateOfCell, size);
             xCoordinateOfCell = 0;
             yCoordinateOfCell += 3 * size - thickness;
         }
+        if(vertically%2 == 1) {
+            drawHexWithoutRightUpper(xCoordinateOfCell, yCoordinateOfCell, size);
+            for(int i = 1; i < horizontally; i++) {
+                drawHexWithoutLeftRightUpper(xCoordinateOfCell, yCoordinateOfCell, size);
+                xCoordinateOfCell += 2 * size - thickness;
+            }
+            drawHexWithoutLeftUpper(xCoordinateOfCell, yCoordinateOfCell, size);
+        } else if(vertically != 2) {
+            drawHexWithoutRightUpperLow(xCoordinateOfCell, yCoordinateOfCell, size);
+            xCoordinateOfCell += (2 * size - thickness) * (horizontally - 1);
+            drawHexWithoutLeftUpperLow(xCoordinateOfCell, yCoordinateOfCell, size);
+        }
+        //draw two extreme lines
         xCoordinateOfCell = size - thickness/2;
         yCoordinateOfCell = 2 * size - thickness/2;
-        for (int i = 0; i < vertically/2; i++) {
-            for (int j = 0; j < horizontally; j++) {
-                if(j == 0)
-                    drawBrasenhem(xCoordinateOfCell, yCoordinateOfCell, xCoordinateOfCell,
-                            yCoordinateOfCell + size, borderColor);
-                if(j == horizontally - 1)
-                    drawBrasenhem(xCoordinateOfCell+thickness, yCoordinateOfCell,
-                            xCoordinateOfCell+thickness, yCoordinateOfCell + size, borderColor);
-                xCoordinateOfCell += 2 * size-thickness;
-            }
+        for(int i = 0; i < vertically/2; i++) {
+            drawBrasenhem(xCoordinateOfCell, yCoordinateOfCell, xCoordinateOfCell,
+                    yCoordinateOfCell + size, borderColor);
+            xCoordinateOfCell += (2 * size-thickness) * (horizontally - 1);
+            drawBrasenhem(xCoordinateOfCell+thickness, yCoordinateOfCell,
+                    xCoordinateOfCell+thickness, yCoordinateOfCell + size, borderColor);
             xCoordinateOfCell = size - thickness/2;
             yCoordinateOfCell += 3 * size - thickness;
         }
+        //draw pairs of lower lines
         if (vertically % 2 == 0) {
             xCoordinateOfCell = size - thickness/2;
             yCoordinateOfCell = (vertically/2-1)*(2*size + radius) + thickness + 3*radius/2;
             for (int i = 0; i < horizontally - 1; i++) {
                 draw2Lines(xCoordinateOfCell, yCoordinateOfCell, size);
-                xCoordinateOfCell += 2 * size- thickness;
+                xCoordinateOfCell += 2 * size - thickness;
             }
         }
     }
-
-    private void drawHexWithoutLeftRightHih(int x, int y, int size) {
+    private void drawHexesForThickness1() {
+        int xCoordinate = 0;
+        int yCoordinate = 0;
+        for (int i = 0; i < (vertically+1)/2; i++) {
+            for (int j = 0; j < horizontally; j++) {
+                drawHex(xCoordinate, yCoordinate, radius);
+                xCoordinate += 2 * radius;
+            }
+            xCoordinate = 0;
+            yCoordinate += 3 * radius;
+        }
+        xCoordinate = radius;
+        yCoordinate = 2 * radius;
+        for (int i = 0; i < vertically/2; i++) {
+            for (int j = 0; j < horizontally; j++) {
+                drawBrasenhem(xCoordinate, yCoordinate, xCoordinate, yCoordinate + radius, borderColor);
+                xCoordinate += 2 * radius;
+            }
+            xCoordinate = radius;
+            yCoordinate += 3 * radius;
+        }
+        if (vertically % 2 == 0) {
+            xCoordinate = radius;
+            yCoordinate = (3 * radius * (vertically - 1)) / 2;
+            for (int i = 0; i < horizontally - 1; i++) {
+                draw2Lines(xCoordinate, yCoordinate, radius);
+                xCoordinate += 2 * radius;
+            }
+        }
+    }
+    private void drawHexWithoutLeftRightUpper(int x, int y, int size) {
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
     }
-
-    private void drawHexWithoutRightHih(int x, int y, int size) {
+    private void drawHexWithoutRightUpper(int x, int y, int size) {
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
         drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
         drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
-
-    private void drawHexWithoutLeftHih(int x, int y, int size) {
+    private void drawHexWithoutLeftUpper(int x, int y, int size) {
         drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
     }
-
-    private void drawHexWithoutLeftHihLow(int x, int y, int size) {
+    private void drawHexWithoutLeftUpperLow(int x, int y, int size) {
         drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
     }
-
-    private void drawHexWithoutRightHihLow(int x, int y, int size) {
+    private void drawHexWithoutRightUpperLow(int x, int y, int size) {
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
         drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
         drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
-
     private void drawHexWithoutLeftLow(int x, int y, int size) {
         drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + size / 2, x + 2 * size, y + 3 * size / 2, borderColor);
         drawBrasenhem(x + 2 * size, y + 3 * size / 2, x + size, y + 2 * size, borderColor);
         drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
-
     private void drawHexWithoutRightAndLeftLow(int x, int y, int size) {
         drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
         drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
-
     private void drawHexWithoutRightLow(int x, int y, int size) {
         drawBrasenhem(x + size, y, x + 2 * size, y + size / 2, borderColor);
         drawBrasenhem(x + size, y + 2 * size, x, y + 3 * size / 2, borderColor);
         drawBrasenhem(x, y + 3 * size / 2, x, y + size / 2, borderColor);
         drawBrasenhem(x, y + size / 2, x + size, y, borderColor);
     }
-
     private void draw2Lines(int x, int y, int r) {
         drawBrasenhem(x + 2 * r, y + 3 * r / 2, x + r, y + 2 * r, borderColor);
         drawBrasenhem(x + r, y + 2 * r, x, y + 3 * r / 2, borderColor);
@@ -583,13 +561,19 @@ public class View extends Logic {
         removeAll();
         drawField();
     }
-
     public void resetImpAndRedraw() {
         resetImpacts();
         this.getGraphics().drawImage(image, 0, 0, null);
     }
-
     public boolean isXOR() {
         return XOR;
+    }
+    private boolean checkSpecialCase(int x, int y) {
+        int current = image.getRGB(x, y);
+        while (x != fieldWidth && image.getRGB(x, y) != borderColor.getRGB()) {
+            x++;
+            current= image.getRGB(x, y);
+        }
+        return current == borderColor.getRGB();
     }
 }

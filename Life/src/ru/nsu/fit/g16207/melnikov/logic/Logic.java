@@ -1,6 +1,7 @@
 package ru.nsu.fit.g16207.melnikov.logic;
 import javax.swing.*;
 public class Logic extends JPanel {
+    private static final int MAX_UNPAINTABLE_VALUE_OF_THICKNESS = 4;
     protected static int thickness;
     protected static int horizontally;
     protected static int vertically;
@@ -14,7 +15,7 @@ public class Logic extends JPanel {
     protected int numberOfAliveCells = 0;
     protected Cell[][] cells;
     protected Logic() {
-        setParameters(10, 10, 27, 1);
+        setParameters(10, 10, 24, 6);
         setImpacts(2.0, 3.3,2.3,2.9,1.0,0.3);
         cellsInitialization();
     }
@@ -28,26 +29,27 @@ public class Logic extends JPanel {
         }
         //set centres of cells
             //set into odd lines
-        int xCoordinateOfCentre = thickness + radius;
-        int yCoordinateOfCentre = thickness + radius;
+        int valueToCalculate = thickness <= MAX_UNPAINTABLE_VALUE_OF_THICKNESS ? 0 : thickness;
+        int xCoordinateOfCentre = valueToCalculate + radius;
+        int yCoordinateOfCentre = valueToCalculate + radius;
         for(int i = 0; i < vertically; i += 2) {
             for(int j = 0; j < horizontally; j++) {
                 cells[i][j].setCentre(xCoordinateOfCentre, yCoordinateOfCentre);
-                xCoordinateOfCentre+=2 *radius + thickness;
+                xCoordinateOfCentre+=2 *radius + valueToCalculate;
             }
-            xCoordinateOfCentre = thickness + radius;
-            yCoordinateOfCentre+= (2*(thickness + radius) + radius);
+            xCoordinateOfCentre = valueToCalculate + radius;
+            yCoordinateOfCentre+= (2*(valueToCalculate + radius) + radius);
         }
             //set into even lines
-        xCoordinateOfCentre = thickness + 2 * radius +thickness/2;
-        yCoordinateOfCentre = 2*(radius + thickness) + radius/2;
+        xCoordinateOfCentre = valueToCalculate + 2 * radius +valueToCalculate/2;
+        yCoordinateOfCentre = 2*(radius + valueToCalculate) + radius/2;
         for(int i = 1; i < vertically; i += 2) {
             for(int j = 0; j < horizontally-1; j++) {
                 cells[i][j].setCentre(xCoordinateOfCentre, yCoordinateOfCentre);
-                xCoordinateOfCentre+=2 *radius + thickness;
+                xCoordinateOfCentre+=2 *radius + valueToCalculate;
             }
-            xCoordinateOfCentre = thickness + 2 * radius +thickness/2;
-            yCoordinateOfCentre+= (2*(thickness + radius) + radius);
+            xCoordinateOfCentre = valueToCalculate + 2 * radius +valueToCalculate/2;
+            yCoordinateOfCentre+= (2*(valueToCalculate + radius) + radius);
         }
     }
     protected boolean changedState(int line, int column) {
@@ -178,7 +180,7 @@ public class Logic extends JPanel {
                 radius == newRadius;
         horizontally = newHorizontally;
         vertically = newVertically;
-        thickness =  newThickness < 5 ? 0 : newThickness;
+        thickness =  newThickness <= MAX_UNPAINTABLE_VALUE_OF_THICKNESS ? 0 : newThickness;
         radius = newRadius;
         return ret;
     }

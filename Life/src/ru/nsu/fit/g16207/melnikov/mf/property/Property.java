@@ -19,7 +19,7 @@ public class Property extends JFrame {
     private final static int minRadius = 7;
     private final static int maxRadius = 36;
     private final static int minThickness = 0;
-    private final static int maxThickness = 20;
+    private final static int maxThickness = 21;
     private final static int minPeriod = 100;
     private final static int maxPeriod = 2900;
     private static MainFrame frame;
@@ -153,9 +153,9 @@ public class Property extends JFrame {
                     "WARNING", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        int sizeOfNewField =
-                view.getNewFieldHeight(verticallyChangerValue.getNewValue(), radiusChangerValue.getNewValue(), thicknessChangerValue.getNewValue()) *
-                view.getNewFieldWidth(horizontallyChangerValue.getNewValue(), radiusChangerValue.getNewValue(), thicknessChangerValue.getNewValue());
+        int sizeOfNewField = 8;
+                //view.getNewFieldHeight(verticallyChangerValue.getNewValue(), radiusChangerValue.getNewValue(), thicknessChangerValue.getNewValue()) *
+                //view.getNewFieldWidth(horizontallyChangerValue.getNewValue(), radiusChangerValue.getNewValue(), thicknessChangerValue.getNewValue());
         if(sizeOfNewField > MAX_SIZE_OF_FIELD) {
             showMessageDialog(this, FIELD_TO_LARGE,
                     "WARNING", JOptionPane.WARNING_MESSAGE);
