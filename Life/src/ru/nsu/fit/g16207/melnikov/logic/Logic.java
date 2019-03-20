@@ -14,6 +14,7 @@ public class Logic extends JPanel {
     private double SND_IMPACT;
     protected int numberOfAliveCells = 0;
     protected Cell[][] cells;
+    private double newImpact = 0;
     protected Logic() {
         setParameters(10, 10, 24, 6);
         setImpacts(2.0, 3.3,2.3,2.9,1.0,0.3);
@@ -72,50 +73,31 @@ public class Logic extends JPanel {
         int line = 0; int column = 0;
         for(Cell[] cell: cells) {
             for(Cell cell1 : cell) {
-                double newImpact = 0;
-                if(needToChangeImpact(line,column + 1)) {
-                    newImpact+=FST_IMPACT;
-                }
-                if(needToChangeImpact(line,column - 1)) {
-                    newImpact+=FST_IMPACT;
-                }
+                newImpact = 0;
+                changeImpactIfNeed(line, column + 1, FST_IMPACT);
+                changeImpactIfNeed(line, column - 1, FST_IMPACT);
                 int offset = column + line%2;
-                if(needToChangeImpact(line+1,offset)) {
-                    newImpact+=FST_IMPACT;
-                }
-                if(needToChangeImpact(line-1,offset)) {
-                    newImpact+=FST_IMPACT;
-                }
-                if(needToChangeImpact(line + 1, offset - 1)) {
-                    newImpact+=FST_IMPACT;
-                }
-                if(needToChangeImpact(line - 1, offset - 1)) {
-                    newImpact+=FST_IMPACT;
-                }
-                if(needToChangeImpact(line - 2, column)) {
-                    newImpact+=SND_IMPACT;
-                }
-                if(needToChangeImpact(line + 2, column)) {
-                    newImpact+=SND_IMPACT;
-                }
+                changeImpactIfNeed(line + 1, offset, FST_IMPACT);
+                changeImpactIfNeed(line - 1, offset, FST_IMPACT);
+                changeImpactIfNeed(line + 1, offset - 1, FST_IMPACT);
+                changeImpactIfNeed(line - 1, offset - 1, FST_IMPACT);
+                changeImpactIfNeed(line - 2, column, SND_IMPACT);
+                changeImpactIfNeed(line + 2, column, SND_IMPACT);
                 offset++;
-                if(needToChangeImpact(line + 1, offset)) {
-                    newImpact+=SND_IMPACT;
-                }
-                if(needToChangeImpact(line - 1, offset)) {
-                    newImpact+=SND_IMPACT;
-                }
-                if(needToChangeImpact(line + 1, offset - 3)) {
-                    newImpact+=SND_IMPACT;
-                }
-                if(needToChangeImpact(line - 1, offset - 3)) {
-                    newImpact+=SND_IMPACT;
-                }
+                changeImpactIfNeed(line + 1, offset, SND_IMPACT);
+                changeImpactIfNeed(line - 1, offset, SND_IMPACT);
+                changeImpactIfNeed(line + 1, offset - 3, SND_IMPACT);
+                changeImpactIfNeed(line - 1, offset - 3, SND_IMPACT);
                 column++;
                 cell1.setImpact(newImpact);
             }
             column = 0;
             line++;
+        }
+    }
+    private void changeImpactIfNeed(int line, int column, double impact) {
+        if(needToChangeImpact(line, column)) {
+            newImpact+=impact;
         }
     }
     protected void changeState(int line, int column) {
@@ -128,43 +110,26 @@ public class Logic extends JPanel {
             numberOfAliveCells++;
             cells[line][column].setLife();
         }
-        if(cellExist(line, column+1)) {
-            cells[line][column+1].changeImpact(FST_IMPACT * sign);
-        }
-        if(cellExist(line, column-1)) {
-            cells[line][column-1].changeImpact( FST_IMPACT * sign);
-        }
+        double valueToAdding = FST_IMPACT * sign;
+        resetImpactIfCellExist(line, column+1, valueToAdding);
+        resetImpactIfCellExist(line, column-1, valueToAdding);
         int offset = column + line%2;
-        if(cellExist(line+1,offset)) {
-            cells[line+1][offset].changeImpact( FST_IMPACT * sign);
-        }
-        if(cellExist(line-1,offset)) {
-            cells[line-1][offset].changeImpact( FST_IMPACT * sign);
-        }
-        if(cellExist(line+1, offset-1)) {
-            cells[line+1][offset-1].changeImpact( FST_IMPACT * sign);
-        }
-        if(cellExist(line-1, offset-1)) {
-            cells[line-1][offset-1].changeImpact( FST_IMPACT * sign);
-        }
-        if(cellExist(line-2, column)) {
-            cells[line-2][column].changeImpact( SND_IMPACT * sign);
-        }
-        if(cellExist(line+2, column)) {
-            cells[line+2][column].changeImpact( SND_IMPACT * sign);
-        }
+        resetImpactIfCellExist(line + 1, offset, valueToAdding);
+        resetImpactIfCellExist(line - 1, offset, valueToAdding);
+        resetImpactIfCellExist(line + 1, offset - 1, valueToAdding);
+        resetImpactIfCellExist(line - 1, offset - 1, valueToAdding);
+        valueToAdding = SND_IMPACT * sign;
+        resetImpactIfCellExist(line - 2, column, valueToAdding);
+        resetImpactIfCellExist(line + 2, column, valueToAdding);
         offset++;
-        if(cellExist(line+1, offset)) {
-            cells[line+1][offset].changeImpact( SND_IMPACT * sign);
-        }
-        if(cellExist(line-1, offset)) {
-            cells[line-1][offset].changeImpact( SND_IMPACT * sign);
-        }
-        if(cellExist(line+1, offset-3)) {
-            cells[line+1][offset-3].changeImpact( SND_IMPACT * sign);
-        }
-        if(cellExist(line-1, offset-3)) {
-            cells[line-1][offset-3].changeImpact( SND_IMPACT * sign);
+        resetImpactIfCellExist(line + 1, offset, valueToAdding);
+        resetImpactIfCellExist(line - 1, offset, valueToAdding);
+        resetImpactIfCellExist(line + 1, offset - 3, valueToAdding);
+        resetImpactIfCellExist(line - 1, offset - 3, valueToAdding);
+    }
+    private void resetImpactIfCellExist(int line, int column, double impact) {
+        if(cellExist(line, column)) {
+            cells[line][column].changeImpact( impact);
         }
     }
     private boolean needToChangeImpact(int line, int column) {
