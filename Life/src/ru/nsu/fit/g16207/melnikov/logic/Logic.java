@@ -14,7 +14,6 @@ public class Logic extends JPanel {
     private double SND_IMPACT;
     protected int numberOfAliveCells = 0;
     protected Cell[][] cells;
-    private double newImpact = 0;
     protected Logic() {
         setParameters(10, 10, 24, 6);
         setImpacts(2.0, 3.3,2.3,2.9,1.0,0.3);
@@ -73,21 +72,21 @@ public class Logic extends JPanel {
         int line = 0; int column = 0;
         for(Cell[] cell: cells) {
             for(Cell cell1 : cell) {
-                newImpact = 0;
-                changeImpactIfNeed(line, column + 1, FST_IMPACT);
-                changeImpactIfNeed(line, column - 1, FST_IMPACT);
+                double newImpact = 0;
+                newImpact+=getImpactIfNeed(line, column + 1, FST_IMPACT);
+                newImpact+=getImpactIfNeed(line, column - 1, FST_IMPACT);
                 int offset = column + line%2;
-                changeImpactIfNeed(line + 1, offset, FST_IMPACT);
-                changeImpactIfNeed(line - 1, offset, FST_IMPACT);
-                changeImpactIfNeed(line + 1, offset - 1, FST_IMPACT);
-                changeImpactIfNeed(line - 1, offset - 1, FST_IMPACT);
-                changeImpactIfNeed(line - 2, column, SND_IMPACT);
-                changeImpactIfNeed(line + 2, column, SND_IMPACT);
+                newImpact+=getImpactIfNeed(line + 1, offset, FST_IMPACT);
+                newImpact+=getImpactIfNeed(line - 1, offset, FST_IMPACT);
+                newImpact+=getImpactIfNeed(line + 1, offset - 1, FST_IMPACT);
+                newImpact+=getImpactIfNeed(line - 1, offset - 1, FST_IMPACT);
+                newImpact+=getImpactIfNeed(line - 2, column, SND_IMPACT);
+                newImpact+=getImpactIfNeed(line + 2, column, SND_IMPACT);
                 offset++;
-                changeImpactIfNeed(line + 1, offset, SND_IMPACT);
-                changeImpactIfNeed(line - 1, offset, SND_IMPACT);
-                changeImpactIfNeed(line + 1, offset - 3, SND_IMPACT);
-                changeImpactIfNeed(line - 1, offset - 3, SND_IMPACT);
+                newImpact+=getImpactIfNeed(line + 1, offset, SND_IMPACT);
+                newImpact+=getImpactIfNeed(line - 1, offset, SND_IMPACT);
+                newImpact+=getImpactIfNeed(line + 1, offset - 3, SND_IMPACT);
+                newImpact+=getImpactIfNeed(line - 1, offset - 3, SND_IMPACT);
                 column++;
                 cell1.setImpact(newImpact);
             }
@@ -95,10 +94,11 @@ public class Logic extends JPanel {
             line++;
         }
     }
-    private void changeImpactIfNeed(int line, int column, double impact) {
+    private double getImpactIfNeed(int line, int column, double impact) {
         if(needToChangeImpact(line, column)) {
-            newImpact+=impact;
+            return impact;
         }
+        return 0.0;
     }
     protected void changeState(int line, int column) {
         double sign = 1;
