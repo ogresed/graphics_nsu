@@ -1,0 +1,15 @@
+Реализация фильтров находится  в пакете model.filter
+BlurFilter - blur-фильтр
+DoublingFilter - увеличение
+EmbossingFilter - тиснение
+Floyd-SteinbergDitheringFilter - Флойд-Стейнберг дизеринг
+GammaFilter - гамма-коррекция
+GrayScaleFilter - черно-белое изображение
+MedianFilter - медианный фильтр
+NegativeFilter - негатив
+OrderedDitheringFilter - ordered дизеринг
+RobertsFilter - оператор Робертса
+RotationFilter - поворот
+SharpeningFilter - увеличение резкости
+SobelFilter - оператор Собеля
+WatercoloringFilter - акварелизация

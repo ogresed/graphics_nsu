@@ -1,3 +1,7 @@
+Filter/.idea/*
+Filter/Filter.iml
+Filter/out/*
 Life/.idea/*
-Life/out/*
 Life/Life.iml
+Life/out/*
+.gitignore
