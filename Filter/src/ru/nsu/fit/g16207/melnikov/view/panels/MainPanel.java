@@ -85,7 +85,6 @@ public class MainPanel extends JPanel {
         displayedOriginalImage = image;
         repaint();
     }
-
     private void resizeImage() {
         double attitude = originalImage.getWidth() * 1.0 / originalImage.getHeight();
         int newWidth;
@@ -269,10 +268,8 @@ public class MainPanel extends JPanel {
             if (!checkIfImageIsChosen()) {
                 return;
             }
-            if (checkCoordinates(mouseEvent.getX(), mouseEvent.getY())) {
-                startX = transformX(mouseEvent.getX());
-                startY = transformY(mouseEvent.getY());
-            }
+            drawSquareAndSelectedImage(mouseEvent.getX(), mouseEvent.getY());
+            repaint();
         }
         @Override
         public void mouseReleased(MouseEvent mouseEvent) {
@@ -283,14 +280,33 @@ public class MainPanel extends JPanel {
         @Override
         public void mouseDragged(MouseEvent mouseEvent) {
             super.mouseDragged(mouseEvent);
-            if (checkCoordinates(mouseEvent.getX(), mouseEvent.getY())) {
-                startX = transformX(mouseEvent.getX());
-                startY = transformY(mouseEvent.getY());
-                drawSelectedImage(startX, startY);
-                drawSquare(mouseEvent.getX(), mouseEvent.getY(),
-                        (int) (IMAGE_SIZE * widthResizeCoefficient), (int) (IMAGE_SIZE * heightResizeCoefficient));
-                repaint();
-            }
+            drawSquareAndSelectedImage(mouseEvent.getX(), mouseEvent.getY());
+            repaint();
+        }
+        private void drawSquareAndSelectedImage(int xCoord, int yCoord) {
+            int x = changeX(xCoord);
+            int y = changeY(yCoord);
+            startX = transformX(x);
+            startY = transformY(y);
+            drawSelectedImage(startX, startY);
+            drawSquare(x, y,
+                    (int) (IMAGE_SIZE * widthResizeCoefficient), (int) (IMAGE_SIZE * heightResizeCoefficient));
+        }
+        private int changeY(int y) {
+            if(y < INDENT)
+                return INDENT;
+            int lowBorder = INDENT + IMAGE_SIZE - (int) (IMAGE_SIZE * heightResizeCoefficient);
+            if(y > lowBorder)
+                return lowBorder;
+            return y;
+        }
+        private int changeX(int x) {
+            if(x < INDENT)
+                return INDENT;
+            int rightBorder = INDENT + IMAGE_SIZE - (int) (IMAGE_SIZE * widthResizeCoefficient);
+            if(x > rightBorder)
+                return rightBorder;
+            return x;
         }
         private int transformX(int x) {
             int imageX = x - INDENT;
@@ -299,9 +315,6 @@ public class MainPanel extends JPanel {
         private int transformY(int y) {
             int imageY = y - INDENT;
             return (int) (imageY / heightResizeCoefficient);
-        }
-        private boolean checkCoordinates(int x, int y) {
-            return x > INDENT && x < IMAGE_SIZE + INDENT && y > INDENT && y < IMAGE_SIZE + INDENT;
         }
     }
     private class FilterAppliedHandler implements ValueChangedHandler {
