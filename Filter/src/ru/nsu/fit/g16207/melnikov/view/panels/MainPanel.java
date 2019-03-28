@@ -172,7 +172,6 @@ public class MainPanel extends JPanel {
     }
     public void makeWaterColoring() {
         if (checkIfImagePartIsSelected()) {
-            System.out.println(123456);
             return;
         }
         filterController.makeFilter(new WatercoloringFilter(), selectedImage);
@@ -292,21 +291,23 @@ public class MainPanel extends JPanel {
             drawSquare(x, y,
                     (int) (IMAGE_SIZE * widthResizeCoefficient), (int) (IMAGE_SIZE * heightResizeCoefficient));
         }
-        private int changeY(int y) {
-            if(y < INDENT)
-                return INDENT;
-            int lowBorder = INDENT + IMAGE_SIZE - (int) (IMAGE_SIZE * heightResizeCoefficient);
-            if(y > lowBorder)
-                return lowBorder;
-            return y;
-        }
         private int changeX(int x) {
             if(x < INDENT)
                 return INDENT;
-            int rightBorder = INDENT + IMAGE_SIZE - (int) (IMAGE_SIZE * widthResizeCoefficient);
-            if(x > rightBorder)
-                return rightBorder;
+            int rightBorder = displayedOriginalImage.getWidth();
+            int rightEnd = INDENT + rightBorder - (int) (IMAGE_SIZE * widthResizeCoefficient);
+            if(x > rightEnd)
+                return rightEnd;
             return x;
+        }
+        private int changeY(int y) {
+            if(y < INDENT)
+                return INDENT;
+            int lowBorder = displayedOriginalImage.getHeight();
+            int lowEnd = INDENT + lowBorder - (int) (IMAGE_SIZE * heightResizeCoefficient);
+            if(y > lowEnd)
+                return lowEnd;
+            return y;
         }
         private int transformX(int x) {
             int imageX = x - INDENT;
