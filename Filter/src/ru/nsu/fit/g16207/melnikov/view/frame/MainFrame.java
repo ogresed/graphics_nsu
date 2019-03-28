@@ -18,6 +18,7 @@ public class MainFrame extends JFrame {
     public MainFrame() {
         super();
         setSize(START_WIDTH, START_HEIGHT);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Filter");
         menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -79,20 +80,27 @@ public class MainFrame extends JFrame {
         makeButton("pictures/newDoc.jpg",newDocumentListener,'N', "New Document");
         makeButton("pictures/open.jpg",openListener,'O', "Open file");
         makeButton("pictures/save.jpg",saveListener, 'S', "Save file");
+        toolBar.addSeparator();
         makeButton("pictures/cmyk.png", makeGrayListener,'0', "Make image monochrome");
         makeButton("pictures/contrast.png", makeNegativeListener, '1', "Make image negative");
+        toolBar.addSeparator();
         makeButton("pictures/rgb.png",FSDitheringListener, '2', "Floyd-Steinberg Dithering");
         makeButton("pictures/traffic.png",ODitheringListener, '3', "Ordered Dithering");
+        toolBar.addSeparator();
         makeButton("pictures/barchart.png",makeSharpeningListener, '4', "Image Sharpening");
+        makeButton("pictures/tripod.png",  makeMedianListener, '7', "Apply median filter on image");
+        toolBar.addSeparator();
         makeButton("pictures/embossing.png",makeEmbossingListener, '5', "Image embossing");
         makeButton("pictures/art.png", makeWaterColouringListener, '6', "Image watercoloring");
-        makeButton("pictures/tripod.png",  makeMedianListener, '7', "Apply median filter on image");
         makeButton("pictures/water.png", makeBlurListener, '8', "Blur image");
         makeButton("pictures/crop.png", gammaCorrectionListener, '9', "Apply Gamma Correction");
+        toolBar.addSeparator();
         makeButton("pictures/bikewheel.png", makeRotationListener, 'R', "Rotate image");
         makeButton("pictures/zoomin.png", makeDoublingListener, 'D', "Double central part of image");
         makeButton("pictures/trends.png", makeRobertsListener, 'P', "Roberts diff");
         makeButton("pictures/merge.png", makeSobelListener, 'W', "Sobel diff");
+        toolBar.addSeparator();
+
         makeButton("pictures/upload.png", selectRightListener, 'Z', "Select filtered image to make operations with it");
     }
     private JMenu makeMenu(String file, char f) {

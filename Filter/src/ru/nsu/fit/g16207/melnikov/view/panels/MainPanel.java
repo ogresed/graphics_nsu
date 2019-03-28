@@ -2,6 +2,7 @@ package ru.nsu.fit.g16207.melnikov.view.panels;
 
 import ru.nsu.fit.g16207.melnikov.controller.FilterController;
 import ru.nsu.fit.g16207.melnikov.model.event.FilterApplied;
+import ru.nsu.fit.g16207.melnikov.model.filter.*;
 import ru.nsu.fit.g16207.melnikov.view.ValueChangedHandler;
 import ru.nsu.fit.g16207.melnikov.view.frame.forms.*;
 
@@ -135,140 +136,98 @@ public class MainPanel extends JPanel {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        filterController.makeImageMonochrome(selectedImage);
-        //repaint();
+        filterController.makeFilter(new GrayScaleFilter(), selectedImage);
     }
 
     public void makeNegative() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        filterController.makeImageNegative(selectedImage);
-        //repaint();
+        filterController.makeFilter(new NegativeFilter(), selectedImage);
     }
 
     public void makeFloydSteinbergDithering() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        FloydSteinbergForm floydSteinbergForm = new FloydSteinbergForm();
-        floydSteinbergForm.setFilterController(filterController);
-        floydSteinbergForm.setImage(selectedImage);
-        floydSteinbergForm.setVisible(true);
-        //repaint();
+        new FloydSteinbergForm(filterController, selectedImage);
     }
-
     public void makeOrderedDithering() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        filterController.makeOrderedDithering(selectedImage, 16);
-        //repaint();
+        int matrixSize = 16;
+        filterController.makeFilter(new OrderedDitheringFilter(matrixSize), selectedImage);
     }
-
     public void makeSharpening() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        filterController.makeSharpening(selectedImage);
-        //repaint();
+        filterController.makeFilter(new SharpeningFilter(), selectedImage);
     }
-
     public void makeEmbossing() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        filterController.makeEmbossing(selectedImage);
-        //repaint();
+        filterController.makeFilter(new EmbossingFilter(), selectedImage);
     }
-
     public void makeWaterColoring() {
         if (checkIfImagePartIsSelected()) {
+            System.out.println(123456);
             return;
         }
-        filterController.makeWatercoloring(selectedImage);
-        //repaint();
+        filterController.makeFilter(new WatercoloringFilter(), selectedImage);
     }
-
     public void makeMedian() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        filterController.makeMedian(selectedImage);
-        //repaint();
+        filterController.makeFilter(new MedianFilter(), selectedImage);
     }
-
     public void makeBlur() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        filterController.makeBlur(selectedImage);
-        //repaint();
+        filterController.makeFilter(new BlurFilter(), selectedImage);
     }
-
     public void makeGamma() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        GammaForm gammaForm = new GammaForm();
-        gammaForm.setFilterController(filterController);
-        gammaForm.setImage(selectedImage);
-        gammaForm.setVisible(true);
-        //repaint();
+        new GammaForm(filterController, selectedImage);
     }
-
     public void makeRotation() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        RotationForm rotationForm = new RotationForm();
-        rotationForm.setFilterController(filterController);
-        rotationForm.setImage(selectedImage);
-        rotationForm.setVisible(true);
-        //repaint();
+        new RotationForm(filterController, selectedImage);
     }
-
     public void makeDoubling() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
         int startX = selectedImage.getWidth() / 4;
         int startY = selectedImage.getHeight() / 4;
-
         int newWidth = selectedImage.getWidth() / 2;
         int newHeight = selectedImage.getHeight() / 2;
         BufferedImage subImage = selectedImage.getSubimage(startX, startY, newWidth, newHeight);
-
-        filterController.makeDoubling(subImage);
-        //repaint();
+        filterController.makeFilter(new DoublingFilter(), subImage);
     }
-
     public void makeRoberts() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        RobertsForm robertsForm = new RobertsForm();
-        robertsForm.setFilterController(filterController);
-        robertsForm.setImage(selectedImage);
-        robertsForm.setVisible(true);
-        //repaint();
+        new RobertsForm(filterController, selectedImage);
     }
-
     public void makeSobel() {
         if (checkIfImagePartIsSelected()) {
             return;
         }
-        SobelForm sobelForm = new SobelForm();
-        sobelForm.setFilterController(filterController);
-        sobelForm.setImage(selectedImage);
-        sobelForm.setVisible(true);
-        //repaint();
+        new SobelForm(filterController, selectedImage);
     }
-
     public void save(File file) throws IOException {
         filterController.saveImage(file, filteredImage);
     }
-
     public void makeR2Bmp() {
         ColorModel colorModel = filteredImage.getColorModel();
         boolean isAlphaPremultiplied = colorModel.isAlphaPremultiplied();
@@ -276,7 +235,6 @@ public class MainPanel extends JPanel {
         selectedImage = new BufferedImage(colorModel, raster, isAlphaPremultiplied, null);
         repaint();
     }
-
     public void newDocument() {
         originalImage = null;
         displayedOriginalImage = null;
@@ -328,7 +286,6 @@ public class MainPanel extends JPanel {
             if (checkCoordinates(mouseEvent.getX(), mouseEvent.getY())) {
                 startX = transformX(mouseEvent.getX());
                 startY = transformY(mouseEvent.getY());
-
                 drawSelectedImage(startX, startY);
                 drawSquare(mouseEvent.getX(), mouseEvent.getY(),
                         (int) (IMAGE_SIZE * widthResizeCoefficient), (int) (IMAGE_SIZE * heightResizeCoefficient));
@@ -339,24 +296,20 @@ public class MainPanel extends JPanel {
             int imageX = x - INDENT;
             return (int) (imageX / widthResizeCoefficient);
         }
-
         private int transformY(int y) {
             int imageY = y - INDENT;
             return (int) (imageY / heightResizeCoefficient);
         }
-
         private boolean checkCoordinates(int x, int y) {
             return x > INDENT && x < IMAGE_SIZE + INDENT && y > INDENT && y < IMAGE_SIZE + INDENT;
         }
     }
-
     private class FilterAppliedHandler implements ValueChangedHandler {
         @Override
         public void handle(Object value) {
             if (!(value instanceof FilterApplied)) {
                 return;
             }
-
             FilterApplied filterApplied = (FilterApplied) value;
             filteredImage = filterApplied.getNewImage();
             repaint();

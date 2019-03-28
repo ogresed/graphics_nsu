@@ -62,12 +62,4 @@ public abstract class SimpleForm extends JFrame {
         buttonPanel.add(cancelButton);
         add(buttonPanel, BorderLayout.SOUTH);
     }
-
-    public void setFilterController(FilterController filterController) {
-        this.filterController = filterController;
-    }
-
-    public void setImage(BufferedImage image) {
-        this.image = image;
-    }
 }

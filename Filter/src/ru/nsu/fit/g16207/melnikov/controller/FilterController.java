@@ -20,18 +20,10 @@ public class FilterController {
         handler.handle(value);
     }
 
-    public void makeImageMonochrome(BufferedImage oldImage) {
-        GrayScaleFilter grayScaleFilter = new GrayScaleFilter();
-        BufferedImage newImage = grayScaleFilter.process(oldImage);
-        setChangedImage(new FilterApplied(newImage));
+    public void makeFilter(Filter filter, BufferedImage image) {
+        setChangedImage(new FilterApplied(filter.process(image)));
     }
-
-    public void makeImageNegative(BufferedImage oldImage) {
-        NegativeFilter negativeFilter = new NegativeFilter();
-        BufferedImage newImage = negativeFilter.process(oldImage);
-        setChangedImage(new FilterApplied(newImage));
-    }
-
+    /*
     public void makeFloydSteinbergDithering(BufferedImage oldImage, int nRed, int nGreen, int nBlue) {
         FloydSteinbergDitheringFilter floydSteinbergDitheringFilter =
                 new FloydSteinbergDitheringFilter(nRed, nGreen, nBlue);
@@ -39,13 +31,7 @@ public class FilterController {
         setChangedImage(new FilterApplied(newImage));
     }
 
-    public void makeOrderedDithering(BufferedImage oldImage, int matrixSize) {
-        OrderedDitheringFilter orderedDitheringFilter = new OrderedDitheringFilter(matrixSize);
-        BufferedImage newImage = orderedDitheringFilter.process(oldImage);
-        setChangedImage(new FilterApplied(newImage));
-    }
-
-    public void makeSharpening(BufferedImage oldImage) {
+   public void makeSharpening(BufferedImage oldImage) {
         SharpeningFilter sharpeningFilter = new SharpeningFilter();
         BufferedImage newImage = sharpeningFilter.process(oldImage);
         setChangedImage(new FilterApplied(newImage));
@@ -104,7 +90,7 @@ public class FilterController {
         BufferedImage newImage = sobelFilter.process(oldImage);
         setChangedImage(new FilterApplied(newImage));
     }
-
+*/
     public void saveImage(File file, BufferedImage image) throws IOException {
         boolean isWritten = ImageIO.write(image, "png", file);
         System.out.println(isWritten);

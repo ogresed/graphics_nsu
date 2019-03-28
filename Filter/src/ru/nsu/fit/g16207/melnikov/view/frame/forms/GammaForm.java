@@ -1,6 +1,7 @@
 package ru.nsu.fit.g16207.melnikov.view.frame.forms;
 
 import ru.nsu.fit.g16207.melnikov.controller.FilterController;
+import ru.nsu.fit.g16207.melnikov.model.filter.GammaFilter;
 import ru.nsu.fit.g16207.melnikov.view.panels.TextFieldWithName;
 
 import javax.swing.*;
@@ -13,14 +14,15 @@ public class GammaForm extends JFrame {
     private FilterController filterController;
     private BufferedImage image;
 
-    public GammaForm() {
+    public GammaForm(FilterController controller, BufferedImage selectedImage) {
         gammaField = new TextFieldWithName(new JLabel("Gamma"), Double.toString(0.5));
-
         setSize(300, 150);
         setTitle("Gamma");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
         createAndShowGUI();
+        filterController = controller;
+        image = selectedImage;
+        setVisible(true);
     }
 
     private void createAndShowGUI() {
@@ -36,7 +38,8 @@ public class GammaForm extends JFrame {
         okButton.setActionCommand("OK");
         okButton.addActionListener(actionEvent -> {
             try {
-                filterController.makeGammaCorrection(image, Double.parseDouble(gammaField.getText()));
+                double gammaValue = Double.parseDouble(gammaField.getText());
+                filterController.makeFilter(new GammaFilter(gammaValue), image);
                 setVisible(false);
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(GammaForm.this, "Wrong value (" + e.getMessage() + ")");

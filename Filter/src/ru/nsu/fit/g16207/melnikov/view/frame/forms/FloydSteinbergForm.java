@@ -1,6 +1,8 @@
 package ru.nsu.fit.g16207.melnikov.view.frame.forms;
 
 import ru.nsu.fit.g16207.melnikov.controller.FilterController;
+import ru.nsu.fit.g16207.melnikov.model.filter.Filter;
+import ru.nsu.fit.g16207.melnikov.model.filter.FloydSteinbergDitheringFilter;
 import ru.nsu.fit.g16207.melnikov.view.panels.TextFieldWithName;
 
 import javax.swing.*;
@@ -15,17 +17,18 @@ public class FloydSteinbergForm extends JFrame {
     private FilterController filterController;
     private BufferedImage image;
 
-    public FloydSteinbergForm() {
+    public FloydSteinbergForm(FilterController controller, BufferedImage selectedImage) {
         setSize(300, 150);
         setTitle("Floyd-Steinberg Dithering");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setResizable(false);
-
         nRed = new TextFieldWithName(new JLabel("Count of red colors"), Integer.toString(2));
         nGreen = new TextFieldWithName(new JLabel("Count of green colors"), Integer.toString(2));
         nBlue = new TextFieldWithName(new JLabel("Count of blue colors"), Integer.toString(2));
-
         createAndShowGUI();
+        filterController = controller;
+        image = selectedImage;
+        setVisible(true);
     }
 
     private void createAndShowGUI() {
@@ -50,8 +53,10 @@ public class FloydSteinbergForm extends JFrame {
         okButton.setActionCommand("OK");
         okButton.addActionListener(actionEvent -> {
             try {
-                filterController.makeFloydSteinbergDithering(image, Integer.parseInt(nRed.getText()),
-                        Integer.parseInt(nGreen.getText()), Integer.parseInt(nBlue.getText()));
+                int redValue = Integer.parseInt(nRed.getText());
+                int greenValue = Integer.parseInt(nGreen.getText());
+                int blueValue = Integer.parseInt(nBlue.getText());
+                filterController.makeFilter(new FloydSteinbergDitheringFilter(redValue, greenValue, blueValue), image);
                 setVisible(false);
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(FloydSteinbergForm.this, "Wrong value (" + e.getMessage() + ")");
