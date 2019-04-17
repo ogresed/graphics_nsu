@@ -4,6 +4,7 @@ import ru.nsu.fit.g16207.melnikov.Configuration;
 import ru.nsu.fit.g16207.melnikov.Main;
 import ru.nsu.fit.g16207.melnikov.WrongValueException;
 import ru.nsu.fit.g16207.melnikov.function.Function;
+import ru.nsu.fit.g16207.melnikov.mf.property.Property;
 import ru.nsu.fit.g16207.melnikov.view.MainPanel;
 
 import javax.swing.*;
@@ -20,15 +21,15 @@ public class MainFrame extends JFrame {
     private JToolBar toolBar;
     private Configuration configuration;
     private MainPanel panel;
+    private Property property;
     public MainFrame()  {
         //set base options
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension dimension = toolkit.getScreenSize();
-        width = Main.multiplyByFraction(5, 6, dimension.width);
-        height = Main.multiplyByFraction    (5, 6, dimension.height);
+        width = Main.multiplyByFraction(6, 7, dimension.width);
+        height = Main.multiplyByFraction    (6, 7, dimension.height);
         setBounds((dimension.width - width) / 2, (dimension.height - height) / 2, width, height);
-        setResizable(false);
         //setResizable(false);
         setTitle("Isolines");
         //create menu
@@ -40,11 +41,10 @@ public class MainFrame extends JFrame {
         add(toolBar, BorderLayout.PAGE_START);
         toolBar.setRollover(true);
         createToolbar();
-        //create toggle buttons
-
         //create main panel
         configuration = new Configuration(new Function(-10, 10, -10, 10));
         panel = new MainPanel(this, configuration);
+        property =  new Property(panel, configuration);
         add(panel);
         //end options
         setVisible(true);
@@ -53,7 +53,9 @@ public class MainFrame extends JFrame {
 
     private ActionListener exitListener = e -> System.exit(0);
     private ActionListener openListener = e -> openFile(getOpenFileName());
-    private ActionListener interpolationListener = e -> panel.setInterpolation(!panel.getInterpolation());
+    private ActionListener interpolationListener = e -> panel.setInterpolation();
+    private ActionListener gridListener = e -> panel.setGrid();
+    private ActionListener optionsListener = e -> property.setVisible(true);
 
     private void createMenu() {
         JMenu file =  makeMenu("File", 'F');
@@ -61,12 +63,16 @@ public class MainFrame extends JFrame {
         makeMenuItem(file, "Open", openListener, 'O', "Open configuration");
         JMenu image = makeMenu("Image", 'I');
         makeMenuItem(image, "View", interpolationListener, 'V', "Change view image");
+        makeMenuItem(image, "Grid", gridListener, 'G', "Show grid");
+        makeMenuItem(image, "Options", optionsListener, 'P', "Show options");
     }
 
     private void createToolbar() {
-        makeButton("Exit",exitListener,'E', "Exit");
-        makeButton("Open",openListener,'O', "Exit");
-        makeButton("View",interpolationListener,'V', "Change view image");
+        makeButton("Exit", exitListener,'E', "Exit");
+        makeButton("Open", openListener,'O', "Exit");
+        makeButton("View", interpolationListener,'V', "Change view image");
+        makeButton("Grid", gridListener,'D', "Show grid");
+        makeButton("Options", optionsListener,'P', "Show options");
     }
 
     private void makeMenuItem(JMenu menu, String name, ActionListener l, char mnemonic, String description) {
@@ -138,6 +144,7 @@ public class MainFrame extends JFrame {
             }
             //set loaded parameters
             configuration.setConfiguration(colors, xSize, ySize, valuesNumber);
+            panel.createLegend();
             panel.createAndShowImage();
         } catch (FileNotFoundException e) {
             System.out.println("File not file");

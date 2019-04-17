@@ -1,29 +1,28 @@
 package ru.nsu.fit.g16207.melnikov.function;
 
 public class Function {
-    private final double COEFFICIENT = 50.0;
-    private double minFunction;// = -COEFFICIENT;
-    private double maxFunction;// = COEFFICIENT;
+    private double minFunction;
+    private double maxFunction;
     private double[][] values;
     private double[] keyValues;
     private int numberOfKeyValues;//n
-    private int numberHorizontallyDotes;//k
-    private int numberVerticallyDotes;//m
-    //хорошие значения ***Border это -10 и 10
+
+    private double offsetOfKeyValue;
+    private double offsetOfHorizontally;
+    private double offsetOfVertically;
+    //changeable parameters
+    private int numberHorizontallyDotes = 10;//k
+    private int numberVerticallyDotes = 10;//m
     private double leftBorder;//a
     private double rightBorder;//b
     private double lowerBorder;//c
     private double highBorder;//d
-    private double offsetOfKeyValue;
-    private double offsetOfHorizontally;
-    private double offsetOfVertically;
 
     public Function(double leftBorder, double rightBorder, double lowerBorder, double highBorder) {
         this.leftBorder = leftBorder;
         this.rightBorder = rightBorder;
         this.lowerBorder = lowerBorder;
         this.highBorder = highBorder;
-
     }
 
     public void setValuesNumber(int valuesNumber) {
@@ -60,8 +59,8 @@ public class Function {
             x = leftBorder;
             y+=offsetOfVertically;
         }
-        minFunction = min;// - 1.0;
-        maxFunction = max;// + 1.0;
+        minFunction = min;
+        maxFunction = max;
     }
 
     public void makeFunction() {
@@ -116,15 +115,6 @@ public class Function {
     private void setOffsetOfKeyValue() {
         double numberOfColors = (double)numberOfKeyValues + 1.0;
         offsetOfKeyValue = (maxFunction - minFunction) / numberOfColors;
-    }
-
-    public double operation(double x, double y) {
-        return Math.sin(x) + x*y+ Math.cos(y);//(COEFFICIENT * Math.cos((x + y) / 3));
-    }
-
-    public double discreteFunction(double x, double y) {
-        double value = operation(x, y);
-        return getNearestValue(value);
     }
 
     public double[][] getValues() {
@@ -209,5 +199,14 @@ public class Function {
 
     public double getOffsetOfKeyValue() {
         return offsetOfKeyValue;
+    }
+
+    public boolean needUpdate(int left, int right, int lower, int height) {
+        return !(left == leftBorder && right == rightBorder &&
+                lower == lowerBorder && height == highBorder);
+    }
+
+    public double operation(double x, double y) {
+        return x*y;
     }
 }

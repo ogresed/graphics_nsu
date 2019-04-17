@@ -14,7 +14,6 @@ public class Configuration {
     private int ySize;
     private int valuesNumber;
     private Function function;
-    //private Map<Double, Color> map;
     public Configuration(Function function) {
         this.function = function;
     }
@@ -34,7 +33,6 @@ public class Configuration {
     public int getYSize() {
         return ySize;
     }
-
 
     public int getValuesNumber() {
         return valuesNumber;
@@ -56,22 +54,6 @@ public class Configuration {
         function.setGrid(xSize, ySize);
     }
 
-    /*private void createMap() {
-        map = new HashMap<>();
-        double keyValues[] = function.getKeyValues();
-        for(int i = 0; i < valuesNumber; i++) {
-            //+1 потому что двум крайним значения с обоих концов соотв. одни цвета
-            map.put(keyValues[i+1], colors[i]);
-        }
-        //добавление тех самых концов
-        map.put(keyValues[0], colors[0]);
-        map.put(keyValues[valuesNumber + 1], colors[colors.length - 2]);
-    }
-*/
-    /*public Color getColor(double value) {
-        return map.get(value);
-    }
-*/
     public void setConfiguration(Color[] colors, int xSize, int ySize, int valuesNumber) throws WrongValueException {
         if(xSize < MIN_GRID_SIZE || xSize > MAX_GRID_SIZE ||
                 ySize < MIN_GRID_SIZE || ySize > MAX_GRID_SIZE ||
@@ -85,7 +67,6 @@ public class Configuration {
     private void createValues(int xSize, int ySize, int valuesNumber) {
         setGridSize(xSize, ySize);
         setValuesNumber(valuesNumber);
-        //createMap();
     }
 
     public int getIndexOfColorByValue(double value) {
@@ -102,5 +83,20 @@ public class Configuration {
             index++;
         }
         return index;
+    }
+
+    public static int getMaxGridSize() {
+        return MAX_GRID_SIZE;
+    }
+
+    public static int getMinGridSize() {
+        return MIN_GRID_SIZE;
+    }
+
+    public void setFunction(Function function) {
+        this.function = function;
+    }
+    public void setGrid(int xS, int yS) {
+        createValues(xS, yS, valuesNumber);
     }
 }
