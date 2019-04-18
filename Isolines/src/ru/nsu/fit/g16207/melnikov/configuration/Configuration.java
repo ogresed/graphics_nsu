@@ -1,20 +1,21 @@
-package ru.nsu.fit.g16207.melnikov;
+package ru.nsu.fit.g16207.melnikov.configuration;
 
-import ru.nsu.fit.g16207.melnikov.function.Function;
+import ru.nsu.fit.g16207.melnikov.function.GridFunction;
+import ru.nsu.fit.g16207.melnikov.mf.WrongValueException;
 
 import java.awt.*;
 
 public class Configuration {
-    private static final int MAX_GRID_SIZE = 300;
+    private static final int MAX_GRID_SIZE = 100;
     private static final int MIN_GRID_SIZE = 4;
-    private static final int MAX_VALUES_NUMBER = 500;
+    private static final int MAX_VALUES_NUMBER = 100;
     private static final int MIN_VALUES_NUMBER = 1;
     private Color colors[];
     private int xSize;
     private int ySize;
     private int valuesNumber;
-    private Function function;
-    public Configuration(Function function) {
+    private GridFunction function;
+    public Configuration(GridFunction function) {
         this.function = function;
     }
 
@@ -38,7 +39,7 @@ public class Configuration {
         return valuesNumber;
     }
 
-    public Function getFunction() {
+    public GridFunction getGridFunction() {
         return function;
     }
 
@@ -51,7 +52,8 @@ public class Configuration {
     private void setGridSize(int xSize, int ySize) {
         this.xSize = xSize;
         this.ySize = ySize;
-        function.setGrid(xSize, ySize);
+        int gridParameter = MAX_GRID_SIZE * 10;
+        function.setGrid(xSize, ySize, gridParameter);
     }
 
     public void setConfiguration(Color[] colors, int xSize, int ySize, int valuesNumber) throws WrongValueException {
@@ -93,7 +95,7 @@ public class Configuration {
         return MIN_GRID_SIZE;
     }
 
-    public void setFunction(Function function) {
+    public void setFunction(GridFunction function) {
         this.function = function;
     }
     public void setGrid(int xS, int yS) {

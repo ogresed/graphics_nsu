@@ -1,10 +1,9 @@
 package ru.nsu.fit.g16207.melnikov.mf;
 
-import ru.nsu.fit.g16207.melnikov.Configuration;
+import ru.nsu.fit.g16207.melnikov.configuration.Configuration;
 import ru.nsu.fit.g16207.melnikov.Main;
-import ru.nsu.fit.g16207.melnikov.WrongValueException;
-import ru.nsu.fit.g16207.melnikov.function.Function;
-import ru.nsu.fit.g16207.melnikov.mf.property.Property;
+import ru.nsu.fit.g16207.melnikov.function.GridFunction;
+import ru.nsu.fit.g16207.melnikov.mf.properties.Properties;
 import ru.nsu.fit.g16207.melnikov.view.MainPanel;
 
 import javax.swing.*;
@@ -15,22 +14,19 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class MainFrame extends JFrame {
-    private static int width;
-    private static int height;
     private JMenuBar menuBar;
     private JToolBar toolBar;
     private Configuration configuration;
     private MainPanel panel;
-    private Property property;
+    private Properties properties;
     public MainFrame()  {
-        //set base options
+        //set base size
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension dimension = toolkit.getScreenSize();
-        width = Main.multiplyByFraction(6, 7, dimension.width);
-        height = Main.multiplyByFraction    (6, 7, dimension.height);
+        int width = Main.multiplyByFraction(6, 7, dimension.width);
+        int height = Main.multiplyByFraction(6, 7, dimension.height);
         setBounds((dimension.width - width) / 2, (dimension.height - height) / 2, width, height);
-        //setResizable(false);
         setTitle("Isolines");
         //create menu
         menuBar = new JMenuBar();
@@ -42,9 +38,9 @@ public class MainFrame extends JFrame {
         toolBar.setRollover(true);
         createToolbar();
         //create main panel
-        configuration = new Configuration(new Function(-10, 10, -10, 10));
+        configuration = new Configuration(new GridFunction(-10, 10, -10, 10));
         panel = new MainPanel(this, configuration);
-        property =  new Property(panel, configuration);
+        properties =  new Properties(panel, configuration);
         add(panel);
         //end options
         setVisible(true);
@@ -55,7 +51,8 @@ public class MainFrame extends JFrame {
     private ActionListener openListener = e -> openFile(getOpenFileName());
     private ActionListener interpolationListener = e -> panel.setInterpolation();
     private ActionListener gridListener = e -> panel.setGrid();
-    private ActionListener optionsListener = e -> property.setVisible(true);
+    private ActionListener optionsListener = e -> properties.setVisible(true);
+    private ActionListener isolinesListener = e -> {};//panel.setIsolines();
 
     private void createMenu() {
         JMenu file =  makeMenu("File", 'F');
@@ -65,6 +62,7 @@ public class MainFrame extends JFrame {
         makeMenuItem(image, "View", interpolationListener, 'V', "Change view image");
         makeMenuItem(image, "Grid", gridListener, 'G', "Show grid");
         makeMenuItem(image, "Options", optionsListener, 'P', "Show options");
+        makeMenuItem(image, "Isolines", isolinesListener, 'S', "Show isolines");
     }
 
     private void createToolbar() {
@@ -73,6 +71,7 @@ public class MainFrame extends JFrame {
         makeButton("View", interpolationListener,'V', "Change view image");
         makeButton("Grid", gridListener,'D', "Show grid");
         makeButton("Options", optionsListener,'P', "Show options");
+        makeButton("Isolines", isolinesListener,'S', "Show isolines");
     }
 
     private void makeMenuItem(JMenu menu, String name, ActionListener l, char mnemonic, String description) {
@@ -144,8 +143,10 @@ public class MainFrame extends JFrame {
             }
             //set loaded parameters
             configuration.setConfiguration(colors, xSize, ySize, valuesNumber);
+            properties.setGrid(xSize, ySize);
+            panel.setLevelsAndLines(configuration.getGridFunction());
             panel.createLegend();
-            panel.createAndShowImage();
+            panel.createImage();
         } catch (FileNotFoundException e) {
             System.out.println("File not file");
         } catch (WrongValueException | NumberFormatException e) {

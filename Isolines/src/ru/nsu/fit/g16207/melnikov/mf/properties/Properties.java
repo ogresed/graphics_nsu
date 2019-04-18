@@ -1,7 +1,7 @@
-package ru.nsu.fit.g16207.melnikov.mf.property;
+package ru.nsu.fit.g16207.melnikov.mf.properties;
 
-import ru.nsu.fit.g16207.melnikov.Configuration;
-import ru.nsu.fit.g16207.melnikov.function.Function;
+import ru.nsu.fit.g16207.melnikov.configuration.Configuration;
+import ru.nsu.fit.g16207.melnikov.function.GridFunction;
 import ru.nsu.fit.g16207.melnikov.view.MainPanel;
 
 import javax.swing.*;
@@ -12,25 +12,25 @@ import java.awt.event.KeyEvent;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
-public class Property extends JFrame {
+public class Properties extends JFrame {
     private final static String WRONG_VALUES = "Wrong values";
     private final static String CORRECT_VALUES = "Correct values";
+    private final static int MAX_AMPLITUDE = 400;
     private ChangerValue left;
     private ChangerValue right;
     private ChangerValue lower;
-    private ChangerValue heigh;
+    private ChangerValue high;
     private ChangerValue xSize;
     private ChangerValue ySize;
-    private JPanel panel;
     private JLabel infoLabel;
     private MainPanel mainPanel;
     private Configuration configuration;
-    public Property(MainPanel mainPanel, Configuration configuration) {
+    public Properties(MainPanel mainPanel, Configuration configuration) {
         this.mainPanel = mainPanel;
         this.configuration = configuration;
         int height = 650;
         int width = 400;
-        panel = new JPanel();
+        JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(4, 1));
         add(panel);
         //set base options
@@ -43,22 +43,22 @@ public class Property extends JFrame {
         JPanel areaFunctionsPanel = new JPanel();
         areaFunctionsPanel.setLayout(new GridLayout(2, 2));
         panel.add(areaFunctionsPanel);
-        Function function = configuration.getFunction();
+        GridFunction function = configuration.getGridFunction();
         left = makePanelAndCreateChanger("Left border",
-                (int)function.getLeftBorder(), -1000, 1000, areaFunctionsPanel);
+                (int)function.getLeftBorder(), -MAX_AMPLITUDE, MAX_AMPLITUDE, areaFunctionsPanel);
         right = makePanelAndCreateChanger("Right border",
-                (int)function.getRightBorder(), -1000, 1000, areaFunctionsPanel);
+                (int)function.getRightBorder(), -MAX_AMPLITUDE, MAX_AMPLITUDE, areaFunctionsPanel);
         lower = makePanelAndCreateChanger("Lower border",
-                (int)function.getLowerBorder(), -1000, 1000, areaFunctionsPanel);
-        heigh = makePanelAndCreateChanger("Height border",
-                (int)function.getHighBorder(), -1000, 1000, areaFunctionsPanel);
+                (int)function.getLowerBorder(), -MAX_AMPLITUDE, MAX_AMPLITUDE, areaFunctionsPanel);
+        high = makePanelAndCreateChanger("Height border",
+                (int)function.getHighBorder(), -MAX_AMPLITUDE, MAX_AMPLITUDE, areaFunctionsPanel);
         //create changing grid parameters
         JPanel gridPanel = new JPanel();
         gridPanel.setLayout(new GridLayout(2, 1));
         panel.add(gridPanel);
-        xSize = makePanelAndCreateChanger("Horizontally dots", function.getNumberHorizontallyDotes(),
+        xSize = makePanelAndCreateChanger("Horizontal dots", configuration.getXSize(),
                 Configuration.getMinGridSize(), Configuration.getMaxGridSize(), gridPanel);
-        ySize = makePanelAndCreateChanger("Vertically dots", function.getNumberVerticallyDotes(),
+        ySize = makePanelAndCreateChanger("Vertical dots", configuration.getYSize(),
                 Configuration.getMinGridSize(), Configuration.getMaxGridSize(), gridPanel);
         //add info label
         JPanel infoPanel = new JPanel();
@@ -82,6 +82,9 @@ public class Property extends JFrame {
             int max,
             JPanel parentPanel
         ) {
+        if(value < min || value > max) {
+            value = (min + max)/2;
+        }
         JSlider slider = new JSlider(min, max, value);
         JTextField field = new JTextField(String.valueOf(value), 5);
         ChangerValue changerValue = new ChangerValue(min, max, value,
@@ -131,7 +134,7 @@ public class Property extends JFrame {
         }
     }
     private void onOk() {
-        if(heigh.getNewValue() <= lower.getNewValue() ||
+        if(high.getNewValue() <= lower.getNewValue() ||
                 right.getNewValue() <= left.getNewValue() ||
                 !allIsCorrect()) {
             showMessageDialog(this, WRONG_VALUES,
@@ -139,20 +142,24 @@ public class Property extends JFrame {
             return;
         }
         int leftValue = left.getNewValue(), rightValue = right.getNewValue(),
-                low = lower.getNewValue(), height =heigh.getNewValue();
-        if(configuration.getFunction().needUpdate(leftValue, rightValue, low, height)) {
-            Function function = new Function(left.getNewValue(), right.getNewValue(),
-                    lower.getNewValue(), heigh.getNewValue());
+                low = lower.getNewValue(), height = high.getNewValue();
+        if(configuration.getGridFunction().needUpdate(leftValue, rightValue, low, height)) {
+            GridFunction function = new GridFunction(left.getNewValue(), right.getNewValue(),
+                    lower.getNewValue(), high.getNewValue());
             configuration.setFunction(function);
         }
         configuration.setGrid(xSize.getNewValue(), ySize.getNewValue());
-        mainPanel.createAndShowImage();
+        mainPanel.createImage();
         setVisible(false);
     }
 
     private boolean allIsCorrect() {
         return left.isCorrect() && right.isCorrect() &&
-                lower.isCorrect() && heigh.isCorrect() &&
+                lower.isCorrect() && high.isCorrect() &&
                 xSize.isCorrect() && ySize.isCorrect();
+    }
+    public void setGrid(int xSizeVal, int ySizeVal) {
+        xSize.setNewValue(xSizeVal);
+        ySize.setNewValue(ySizeVal);
     }
 }

@@ -1,17 +1,23 @@
 package ru.nsu.fit.g16207.melnikov.view;
 
-import ru.nsu.fit.g16207.melnikov.Configuration;
-import ru.nsu.fit.g16207.melnikov.Main;
+import ru.nsu.fit.g16207.melnikov.configuration.Configuration;
 import ru.nsu.fit.g16207.melnikov.function.Function;
+import ru.nsu.fit.g16207.melnikov.segment.Lines;
+import ru.nsu.fit.g16207.melnikov.Main;
+import ru.nsu.fit.g16207.melnikov.function.GridFunction;
 import ru.nsu.fit.g16207.melnikov.mf.MainFrame;
+import ru.nsu.fit.g16207.melnikov.segment.Segment;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+
+import static ru.nsu.fit.g16207.melnikov.Main.getValueFromRasterToArea;
+import static ru.nsu.fit.g16207.melnikov.Main.toPixel;
 
 public class MainPanel extends JPanel {
     private final int OFFSET_FROM_IMAGE = 10;
-    private MainFrame frame;
     private BufferedImage colorsImage;
     private BufferedImage interpolationImage;
     private BufferedImage showedImage;
@@ -23,20 +29,21 @@ public class MainPanel extends JPanel {
     private int legendOffset;
     private int widthForLegend;
     private Configuration configuration;
+    private ArrayList<Double> levels;
+    private Lines lines;
     private boolean grid;
     private boolean isolines;
     private boolean interpolation;
-    public MainPanel(MainFrame frame, Configuration configuration) {
-        this.frame = frame;
+    public MainPanel(MainFrame mainFrame, Configuration configuration) {
         this.configuration = configuration;
         grid = false;
         isolines = false;
         interpolation = false;
         showedImage = null;
-        widthOfImage = Main.multiplyByFraction(7, 9, this.frame.getWidth());
-        heightOfImage = Main.multiplyByFraction(7, 9, this.frame.getHeight());
+        widthOfImage = Main.multiplyByFraction(7, 9, mainFrame.getWidth());
+        heightOfImage = Main.multiplyByFraction(7, 9, mainFrame.getHeight());
         legendOffset = widthOfImage + OFFSET_FROM_IMAGE;
-        widthForLegend = frame.getWidth() - 2*OFFSET_FROM_IMAGE - widthOfImage;
+        widthForLegend = (mainFrame.getWidth() - 2*OFFSET_FROM_IMAGE - widthOfImage) / 5;
     }
 
     @Override
@@ -47,17 +54,92 @@ public class MainPanel extends JPanel {
         }
         if(showedLegend != null) {
             g.drawImage(showedLegend,  legendOffset, 0, null);
-            writeKeys();
+            writeKeys(g);
         }
         if(grid) {
             drawGrid(g);
         }
+        if(isolines) {
+            drawAllIsolines(g);
+        }
     }
 
-    private void writeKeys() {
-        double keys[] = configuration.getFunction().getKeyValues();
-        for(int i = 1; i < keys.length - 2; i++) {
-            
+    private void drawAllIsolines(Graphics g) {
+        Color previousColor = g.getColor();
+        g.setColor(configuration.getAllColors()[configuration.getValuesNumber() + 1]);
+        for(double level: levels) {
+            drawIsoline(level, g);
+        }
+        g.setColor(previousColor);
+    }
+
+    private void drawIsoline(double level, Graphics g) {
+        GridFunction function = configuration.getGridFunction();
+        Segment verticalLines[][] = lines.getVerticalLines();
+        Segment horizontalLines[][] = lines.getHorizontalLines();
+        // T L Ш З
+        Segment cell[] = new Segment[4];
+        for(int j = 0; j < function.getNumberHorizontalDotes() - 1; j++) {
+            horizontalLines[0][j].indicateCrossDot(level);
+        }
+        for(int i = 0; i < function.getNumberHorizontalDotes() - 1; i++) {
+            verticalLines[i][0].indicateCrossDot(level);
+            for(int j = 0; j < function.getNumberVerticalDotes() - 1; j++) {
+                verticalLines[i][j+1].indicateCrossDot(level);
+                horizontalLines[i+1][j].indicateCrossDot(level);
+                cell[0] = horizontalLines[i][j];
+                cell[1] = verticalLines[i][j];
+                cell[2] = horizontalLines[i+1][j];
+                cell[3] = verticalLines[i][j+1];
+                drawLine(cell, g);
+            }
+        }
+    }
+
+    private void drawLine(Segment[] cell, Graphics g) {
+        GridFunction function = configuration.getGridFunction();
+        int x1 = 0, x2 = 100, y1 = 0, y2 = 100;
+        if(countCrosses(cell) == 2) {
+            for(int i = 0; i < 3; i++) {
+                if(cell[i].isCrossed()) {
+                    x1 = toPixel(cell[i].getCrossAbscissa(), widthOfImage,
+                            function.getLeftBorder(), function.getRightBorder());
+                    y1 = toPixel(cell[i].getCrossOrdinate(), heightOfImage,
+                            function.getLowerBorder(), function.getHighBorder());
+                }
+            }
+            for(int i = 1; i < 4; i++) {
+                if(cell[i].isCrossed()) {
+                    x2 = toPixel(cell[i].getCrossAbscissa(), widthOfImage,
+                            function.getLeftBorder(), function.getRightBorder());
+                    y2 = toPixel(cell[i].getCrossOrdinate(), heightOfImage,
+                            function.getLowerBorder(), function.getHighBorder());
+                }
+            }
+            g.drawLine(x1, y1, x2, y2);
+        }
+    }
+
+    private int countCrosses(Segment[] cell) {
+        int i = 0;
+        for (int j = 0; j < 4; j++) {
+            if(cell[j].isCrossed()) {
+                i++;
+            }
+        }
+        return i;
+    }
+
+    private void writeKeys(Graphics g) {
+        double keys[] = configuration.getGridFunction().getKeyValues();
+        int offset = Main.multiplyByFraction(1, keys.length - 1, heightOfImage);
+        int alignment = 3;
+        int y = offset;
+        int len = keys.length;
+        for(int i = 1; i < len - 1; i++) {
+            g.drawString(String.format("%.2f", keys[len - 1 - i]),
+                    legendOffset + widthForLegend + OFFSET_FROM_IMAGE, y + alignment);
+            y+=offset;
         }
     }
 
@@ -65,84 +147,88 @@ public class MainPanel extends JPanel {
         //set color
         Color previousColor = g.getColor();
         g.setColor(Color.white);
-        //calculate values
-        Function function = configuration.getFunction();
-        //- 1 потому что учитываются крайние значения
-        int cells = function.getNumberHorizontallyDotes()- 1;
-        int XPixelOffset = (widthOfImage + cells -1)/ (cells);
-        cells = (function.getNumberVerticallyDotes()-1);
-        int YPixelOffset = (heightOfImage + cells -1)/ (cells);
+        //get values
+        GridFunction function = configuration.getGridFunction();
+        double x = function.getLeftBorder();
+        double y = function.getLowerBorder();
+        double xOffset = function.getOffsetOfHorizontal();
+        double yOffset = function.getOffsetOfVertical();
         //drawing
-        int offset = 0;
-        for(int i = 0; i  < configuration.getXSize(); i++) {
-            g.drawLine(offset, 0, offset, heightOfImage - 1);
-            offset+=XPixelOffset;
+        int xSize = function.getNumberHorizontalDotes();
+        int ySize = function.getNumberVerticalDotes();
+        for(int i = 0; i  < xSize; i++) {
+            int pixelX = toPixel(x, widthOfImage, function.getLeftBorder(), function.getRightBorder());
+            g.drawLine(pixelX, 0, pixelX, heightOfImage - 1);
+            x+=xOffset;
         }
-        offset = 0;
-        for(int i = 0; i  < configuration.getYSize(); i++) {
-            g.drawLine(0, offset, widthOfImage - 1, offset);
-            offset+=YPixelOffset;
+        for(int i = 0; i  < ySize; i++) {
+            int pixelY = toPixel(y, heightOfImage, function.getLowerBorder(), function.getRightBorder());
+            g.drawLine(0, pixelY, widthOfImage - 1, pixelY);
+            y+=yOffset;
         }
         g.setColor(previousColor);
     }
 
-    public interface CalculateColor {
-
-        int getColor(double x, double y);
-
+    public void setLevelsAndLines(GridFunction function) {
+        lines = new Lines(function);
+        levels = new ArrayList<>();
+        for(double val : function.getKeyValues()) {
+            levels.add(val);
+        }
     }
-    public void createAndShowImage() {
-        colorsImage = createImage(this::getFunctionColor);
-        interpolationImage = createImage(this::getInterpolationColor);
-        showedImage = colorsImage;
+
+    public void createImage() {
+        Function function = configuration.getGridFunction().getFunction();
+        colorsImage = createImage(widthOfImage, heightOfImage, function, this::getFunctionColor);
+        interpolationImage = createImage(widthOfImage, heightOfImage, function, this::getInterpolColor);
+        showedImage = interpolation ? interpolationImage : colorsImage;
         repaint();
     }
-    public void createLegend() {
-        BufferedImage colorL = new BufferedImage(widthForLegend, heightOfImage, BufferedImage.TYPE_3BYTE_BGR);
-        BufferedImage interpolationL = new BufferedImage(widthForLegend, heightOfImage, BufferedImage.TYPE_3BYTE_BGR);
-        Function function = configuration.getFunction();
-        double offsetByKeyValuesScale = Math.abs(function.getMaxFunction() - function.getMinFunction())
-                / (1.0 * heightOfImage);
-        int interpolImageColor;
-        int colorImageColor;
-        double val = function.getMinFunction();
-        Color colors[] = configuration.getAllColors();
-        for(int i = 0; i < heightOfImage; i++) {
-            // calc two colors to images
-            colorImageColor = colors[configuration.getIndexOfColorByValue(val)].getRGB();
-            interpolImageColor = getInterpolColor(val);
-            //set colors
-            for(int j = 0; j < widthForLegend; j++) {
-                colorL.setRGB(j, i, colorImageColor);
-                interpolationL.setRGB(j, i, interpolImageColor);
+
+    private BufferedImage createImage(int width, int height, Function function, CalculateColor calculate) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+        double x, y;
+        int color;
+        for(int i = 0; i < height; i++) {
+            y = getValueFromRasterToArea(i, height, function.getYmin(), function.getYmax());
+            for(int j = 0; j < width; j++) {
+                x = getValueFromRasterToArea(j, width, function.getXmin(), function.getXmax());
+                color =  calculate.getColor(function.function(x, y));
+                image.setRGB(j, i, color);
             }
-            val+=offsetByKeyValuesScale;
         }
-        colorsLegend = colorL;
-        interpolationLegend = interpolationL;
-        showedLegend = colorsLegend;
+        return image;
     }
 
+    public void createLegend() {
+        GridFunction gridFunction = configuration.getGridFunction();
+        Function function = new Function() {
+            @Override
+            public double function(double x, double y) {
+                return -y;
+            }
+        };
+        function.setYmin(gridFunction.getMinFunction());
+        function.setYmax(gridFunction.getMaxFunction());
+        colorsLegend = createImage(widthForLegend, heightOfImage, function, this::getFunctionColor);
+        interpolationLegend = createImage(widthForLegend, heightOfImage, function, this::getInterpolColor);
+        showedLegend = interpolation ? interpolationLegend : colorsLegend;
+        repaint();
+    }
     /**
      * return color of pixel by coordinates in functions area
      * */
-    private int getFunctionColor(double x, double y) {
-        double value = configuration.getFunction().operation(x, y);
+    private int getFunctionColor(double value) {
         int index = configuration.getIndexOfColorByValue(value);
         return configuration.getAllColors()[index].getRGB();
     }
 
-    private int getInterpolationColor(double x, double y) {
-        double value = configuration.getFunction().operation(x, y);
-        return getInterpolColor(value);
-    }
-
     private int getInterpolColor(double value) {
-        double[] keyValues = configuration.getFunction().getKeyValues();
+        double[] keyValues = configuration.getGridFunction().getKeyValues();
         Color [] colors = configuration.getAllColors();
         int index = configuration.getIndexOfColorByValue(value);
         Color color = colors[index];
-        double keysOffset = configuration.getFunction().getOffsetOfKeyValue();
+        double keysOffset = configuration.getGridFunction().getOffsetOfKeyValue();
         double attitude = Math.abs((value - keyValues[index]) / keysOffset);
         double multiply = 1 - attitude;
         int red = color.getRed();
@@ -158,27 +244,6 @@ public class MainPanel extends JPanel {
                 ((blue & 0xFF)));
     }
 
-    private BufferedImage createImage(CalculateColor calculate) {
-        BufferedImage image = new BufferedImage(widthOfImage, heightOfImage, BufferedImage.TYPE_3BYTE_BGR);
-        Function function = configuration.getFunction();
-        double x, y;
-        int color;
-        for(int i = 0; i < heightOfImage; i++) {
-            y = getValueFromRasterToArea(i, heightOfImage, function.getLowerBorder(), function.getHighBorder());
-            for(int j = 0; j < widthOfImage; j++) {
-                x = getValueFromRasterToArea(j, widthOfImage, function.getLeftBorder(), function.getRightBorder());
-                color =  calculate.getColor(x, y);
-                image.setRGB(j, i, color);
-            }
-        }
-        return image;
-    }
-
-    private double getValueFromRasterToArea(int coordinate, int sizeOfRaster, double minVal, double maxVal) {
-        double sizeArea = Math.abs(maxVal * 1.0 - minVal * 1.0);
-        double attitude = (double)coordinate / (double)sizeOfRaster;
-        return sizeArea * attitude + minVal;
-    }
     public void setInterpolation () {
         interpolation = !interpolation;
         showedImage = interpolation ? interpolationImage : colorsImage;
@@ -186,8 +251,9 @@ public class MainPanel extends JPanel {
         repaint();
     }
 
-    public boolean getInterpolation() {
-        return interpolation;
+    public void setIsolines() {
+        isolines = !isolines;
+        repaint();
     }
 
     public void setGrid() {

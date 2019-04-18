@@ -1,212 +1,53 @@
 package ru.nsu.fit.g16207.melnikov.function;
 
-public class Function {
-    private double minFunction;
-    private double maxFunction;
-    private double[][] values;
-    private double[] keyValues;
-    private int numberOfKeyValues;//n
+public abstract class Function {
+    private double Xmin;
+    private double Xmax;
+    private double Ymin;
+    private double Ymax;
 
-    private double offsetOfKeyValue;
-    private double offsetOfHorizontally;
-    private double offsetOfVertically;
-    //changeable parameters
-    private int numberHorizontallyDotes = 10;//k
-    private int numberVerticallyDotes = 10;//m
-    private double leftBorder;//a
-    private double rightBorder;//b
-    private double lowerBorder;//c
-    private double highBorder;//d
-
-    public Function(double leftBorder, double rightBorder, double lowerBorder, double highBorder) {
-        this.leftBorder = leftBorder;
-        this.rightBorder = rightBorder;
-        this.lowerBorder = lowerBorder;
-        this.highBorder = highBorder;
+    public Function(double xmin, double xmax, double ymin, double ymax) {
+        Xmin = xmin;
+        Xmax = xmax;
+        Ymin = ymin;
+        Ymax = ymax;
     }
 
-    public void setValuesNumber(int valuesNumber) {
-        this.numberOfKeyValues = valuesNumber;
-        setOffsetOfKeyValue();
-        createKeyValues();
+    public Function() {
+
     }
 
-    public void setGrid(int xSize, int ySize) {
-        this.numberHorizontallyDotes = xSize;
-        this.numberVerticallyDotes = ySize;
-        setOffsetOfHorizontally();
-        setOffsetOfVertically();
-        setMaxMinValue();
+    public double getXmin() {
+        return Xmin;
     }
 
-    private void setMaxMinValue() {
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-        double x = leftBorder;
-        double y = lowerBorder;
-        //т.к. учтены крайние значения то -1
-        for(int i = 0; i < numberVerticallyDotes - 1; i++) {
-            for(int j = 0; j < numberHorizontallyDotes - 1; j++) {
-                double tmp = operation(x, y);
-                if(tmp  < min) {
-                    min = tmp;
-                }
-                if(tmp > max) {
-                    max = tmp;
-                }
-                x+=offsetOfHorizontally;
-            }
-            x = leftBorder;
-            y+=offsetOfVertically;
-        }
-        minFunction = min;
-        maxFunction = max;
+    public void setXmin(double xmin) {
+        Xmin = xmin;
     }
 
-    public void makeFunction() {
-        values = new double[numberVerticallyDotes][numberHorizontallyDotes];
-        double x = leftBorder;
-        double y = lowerBorder;
-        for(int i = 0; i < numberVerticallyDotes; i++) {
-            for(int j = 0; j < numberHorizontallyDotes; j++) {
-                values[i][j] = getNearestValue(operation(x, y));
-                x+=offsetOfHorizontally;
-            }
-            x = leftBorder;
-            y+=offsetOfVertically;
-        }
+    public double getXmax() {
+        return Xmax;
     }
 
-    private double getNearestValue(double v) {
-        int indexWithMinimumDifference = 0;
-        double difference = Math.abs(v - keyValues[indexWithMinimumDifference]);
-        for(int i = 1; i < keyValues.length; i++) {
-            double tmpDifference = Math.abs(v - keyValues[i]);
-            if(tmpDifference < difference) {
-                difference = tmpDifference;
-                indexWithMinimumDifference = i;
-            }
-        }
-        return keyValues[indexWithMinimumDifference];
+    public void setXmax(double xmax) {
+        Xmax = xmax;
     }
 
-    private void createKeyValues() {
-        // + 2 потому что прибавляем крайние значения функции
-        int numberOfValuesOfFunction = numberOfKeyValues+2;
-        keyValues = new double[numberOfValuesOfFunction];
-        keyValues[0] = minFunction;
-        keyValues[numberOfValuesOfFunction - 1] = maxFunction;
-        double previousValue = minFunction;
-        for(int i = 1; i < numberOfValuesOfFunction - 1; i++) {
-            previousValue += offsetOfKeyValue;
-            keyValues[i] = previousValue;
-        }
+    public double getYmin() {
+        return Ymin;
     }
 
-    private void setOffsetOfHorizontally() {
-        //так как крайние значения тоже рассматриваются, то - 1
-        offsetOfHorizontally = Math.abs(rightBorder - leftBorder) / (double)(numberHorizontallyDotes - 1);
+    public void setYmin(double ymin) {
+        Ymin = ymin;
     }
 
-    private void setOffsetOfVertically() {
-        offsetOfVertically = Math.abs(highBorder - lowerBorder) / (double)(numberVerticallyDotes - 1);
+    public double getYmax() {
+        return Ymax;
     }
 
-    private void setOffsetOfKeyValue() {
-        double numberOfColors = (double)numberOfKeyValues + 1.0;
-        offsetOfKeyValue = (maxFunction - minFunction) / numberOfColors;
+    public void setYmax(double ymax) {
+        Ymax = ymax;
     }
 
-    public double[][] getValues() {
-        return values;
-    }
-
-    public double[] getKeyValues() {
-        return keyValues;
-    }
-
-    public int getNumberHorizontallyDotes() {
-        return numberHorizontallyDotes;
-    }
-
-    public void setNumberHorizontallyDotes(int numberHorizontallyDotes) {
-        this.numberHorizontallyDotes = numberHorizontallyDotes;
-    }
-
-    public int getNumberVerticallyDotes() {
-        return numberVerticallyDotes;
-    }
-
-    public void setNumberVerticallyDotes(int numberVerticallyDotes) {
-        this.numberVerticallyDotes = numberVerticallyDotes;
-    }
-
-    public int getNumberOfKeyValues() {
-        return numberOfKeyValues;
-    }
-
-    public void setNumberOfKeyValues(int numberOfKeyValues) {
-        this.numberOfKeyValues = numberOfKeyValues;
-    }
-
-    public double getRightBorder() {
-        return rightBorder;
-    }
-
-    public void setRightBorder(int rightBorder) {
-        this.rightBorder = rightBorder;
-    }
-
-    public double getLeftBorder() {
-        return leftBorder;
-    }
-
-    public void setLeftBorder(int leftBorder) {
-        this.leftBorder = leftBorder;
-    }
-
-    public double getHighBorder() {
-        return highBorder;
-    }
-
-    public void setHighBorder(int highBorder) {
-        this.highBorder = highBorder;
-    }
-
-    public double getLowerBorder() {
-        return lowerBorder;
-    }
-
-    public void setLowerBorder(int lowerBorder) {
-        this.lowerBorder = lowerBorder;
-    }
-
-    public double getOffsetOfHorizontally() {
-        return offsetOfHorizontally;
-    }
-
-    public double getOffsetOfVertically() {
-        return offsetOfVertically;
-    }
-
-    public double getMinFunction() {
-        return minFunction;
-    }
-
-    public double getMaxFunction() {
-        return maxFunction;
-    }
-
-    public double getOffsetOfKeyValue() {
-        return offsetOfKeyValue;
-    }
-
-    public boolean needUpdate(int left, int right, int lower, int height) {
-        return !(left == leftBorder && right == rightBorder &&
-                lower == lowerBorder && height == highBorder);
-    }
-
-    public double operation(double x, double y) {
-        return x*y;
-    }
+    public abstract double function(double x, double y);
 }

@@ -1,4 +1,4 @@
-package ru.nsu.fit.g16207.melnikov.mf.property;
+package ru.nsu.fit.g16207.melnikov.mf.properties;
 import javax.swing.*;
 class ChangerValue {
     int min;
@@ -22,6 +22,8 @@ class ChangerValue {
     }
     void setNewValue(int newValue) {
         this.newValue = newValue;
+        slider.setValue(newValue);
+        field.setText(String.valueOf(newValue));
     }
     void setCorrect(boolean correct) {
         this.correct = correct;
