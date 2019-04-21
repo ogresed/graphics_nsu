@@ -8,17 +8,22 @@ import ru.nsu.fit.g16207.melnikov.view.MainPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import static javax.swing.JOptionPane.showMessageDialog;
+
 public class MainFrame extends JFrame {
+    private final String ABOUT = "Init, version 1.0\nCopyright" +
+            "  2019 Sergey Melnikov, FIT, group 16207";
     private JMenuBar menuBar;
     private JToolBar toolBar;
     private Configuration configuration;
     private MainPanel panel;
     private Properties properties;
+
     public MainFrame()  {
         //set base size
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,53 +33,74 @@ public class MainFrame extends JFrame {
         int height = Main.multiplyByFraction(6, 7, dimension.height);
         setBounds((dimension.width - width) / 2, (dimension.height - height) / 2, width, height);
         setTitle("Isolines");
+        //setLayout(new GridLayout(2, 1));
         //create menu
         menuBar = new JMenuBar();
         setJMenuBar(menuBar);
-        createMenu();
         //create toolbar
         toolBar = new JToolBar();
         add(toolBar, BorderLayout.PAGE_START);
         toolBar.setRollover(true);
-        createToolbar();
+        //create buttons
+        createButtons();
+        //create status bar
+        StatusBar statusBar = new StatusBar();
         //create main panel
-        configuration = new Configuration(new GridFunction(-10, 10, -10, 10));
-        panel = new MainPanel(this, configuration);
+        configuration = new Configuration(new GridFunction(-400, 5, -5, 5));
+        panel = new MainPanel(configuration, statusBar);
         properties =  new Properties(panel, configuration);
-        add(panel);
+        //adding
+        add(panel, BorderLayout.CENTER);
+        add(statusBar, BorderLayout.SOUTH);
         //end options
         setVisible(true);
         revalidate();
     }
 
+    private ActionListener dotsListener = e -> panel.setEnteringDot();
     private ActionListener exitListener = e -> System.exit(0);
+    private ActionListener clearListener = e -> panel.clearExcessLines();
     private ActionListener openListener = e -> openFile(getOpenFileName());
     private ActionListener interpolationListener = e -> panel.setInterpolation();
     private ActionListener gridListener = e -> panel.setGrid();
     private ActionListener optionsListener = e -> properties.setVisible(true);
-    private ActionListener isolinesListener = e -> {};//panel.setIsolines();
+    private ActionListener isolinesListener = e -> panel.setIsolines();
+    private ActionListener aboutListener = e -> showMessageDialog(this, ABOUT,
+            "About Init", JOptionPane.INFORMATION_MESSAGE);
 
-    private void createMenu() {
+    private void createButtons() {
         JMenu file =  makeMenu("File", 'F');
-        makeMenuItem(file, "Exit", exitListener, 'E', "Exit");
-        makeMenuItem(file, "Open", openListener, 'O', "Open configuration");
+        createAction(file, "pictures/Exit.png", exitListener,'E', "Exit");
+        createAction(file, "pictures/Open.png", openListener,'O', "Exit");
+        toolBar.addSeparator();
         JMenu image = makeMenu("Image", 'I');
-        makeMenuItem(image, "View", interpolationListener, 'V', "Change view image");
-        makeMenuItem(image, "Grid", gridListener, 'G', "Show grid");
-        makeMenuItem(image, "Options", optionsListener, 'P', "Show options");
-        makeMenuItem(image, "Isolines", isolinesListener, 'S', "Show isolines");
+        createAction(image, "pictures/View.png", interpolationListener,'V', "Change view image");
+        createAction(image, "pictures/Grid.png", gridListener,'G', "Show grid");
+        createAction(image, "pictures/Dots.png", dotsListener, 'D', "Dots mode");
+        createAction(image, "pictures/Isolines.png", isolinesListener,'S', "Show isolines");
+        createAction(image, "pictures/Clear.png", clearListener,'C', "Remove user's isolines");
+        createAction(image, "pictures/Options.png", optionsListener,'P', "Show options");
+        toolBar.addSeparator();
+        createAction(image, "pictures/About.png", aboutListener,'A', "Shows program version and copyright information");
+
     }
 
-    private void createToolbar() {
-        makeButton("Exit", exitListener,'E', "Exit");
-        makeButton("Open", openListener,'O', "Exit");
-        makeButton("View", interpolationListener,'V', "Change view image");
-        makeButton("Grid", gridListener,'D', "Show grid");
-        makeButton("Options", optionsListener,'P', "Show options");
-        makeButton("Isolines", isolinesListener,'S', "Show isolines");
+    private void createAction(
+            JMenu menu,
+            String nameOfIcon,
+            ActionListener listener,
+            char mnemonic,
+            String description
+    ) {
+        makeMenuItem(menu, nameOfIcon, listener, mnemonic, description);
+        makeButton(nameOfIcon, listener,mnemonic, description);
     }
 
     private void makeMenuItem(JMenu menu, String name, ActionListener l, char mnemonic, String description) {
+        String tmp[] = name.split("/");
+        String s = tmp[tmp.length - 1];
+        tmp = s.split("[.]");
+        name = tmp[0];
         JMenuItem item = menu.add(new JMenuItem(name));
         item.addActionListener(l);
         item.setMnemonic(mnemonic);
@@ -144,9 +170,10 @@ public class MainFrame extends JFrame {
             //set loaded parameters
             configuration.setConfiguration(colors, xSize, ySize, valuesNumber);
             properties.setGrid(xSize, ySize);
-            panel.setLevelsAndLines(configuration.getGridFunction());
+            panel.setSelected(true);
             panel.createLegend();
             panel.createImage();
+            panel.createAllIsolines(configuration.getGridFunction());
         } catch (FileNotFoundException e) {
             System.out.println("File not file");
         } catch (WrongValueException | NumberFormatException e) {
@@ -162,3 +189,4 @@ public class MainFrame extends JFrame {
         return FileUtils.getOpenFileName(this, "txt", "Text file");
     }
 }
+

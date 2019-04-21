@@ -22,6 +22,9 @@ class ChangerValue {
     }
     void setNewValue(int newValue) {
         this.newValue = newValue;
+    }
+    void setValue(int newValue) {
+        this.newValue = newValue;
         slider.setValue(newValue);
         field.setText(String.valueOf(newValue));
     }

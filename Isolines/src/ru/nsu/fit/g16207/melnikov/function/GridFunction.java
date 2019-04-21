@@ -78,25 +78,12 @@ public class GridFunction {
         double y = lowerBorder;
         for(int i = 0; i < numberVerticalDotes; i++) {
             for(int j = 0; j < numberHorizontalDotes; j++) {
-                values[i][j] = getNearestValue(function(x, y));
+                values[i][j] = function(x, y);
                 x+= offsetOfHorizontal;
             }
             x = leftBorder;
             y+= offsetOfVertical;
         }
-    }
-
-    private double getNearestValue(double v) {
-        int indexWithMinimumDifference = 0;
-        double difference = Math.abs(v - keyValues[indexWithMinimumDifference]);
-        for(int i = 1; i < keyValues.length; i++) {
-            double tmpDifference = Math.abs(v - keyValues[i]);
-            if(tmpDifference < difference) {
-                difference = tmpDifference;
-                indexWithMinimumDifference = i;
-            }
-        }
-        return keyValues[indexWithMinimumDifference];
     }
 
     private void createKeyValues() {
@@ -113,11 +100,11 @@ public class GridFunction {
     }
 
     private void setOffsetOfHorizontal() {
-        offsetOfHorizontal = Math.abs(rightBorder - leftBorder) / (double)(numberHorizontalDotes);
+        offsetOfHorizontal = Math.abs(rightBorder - leftBorder) / (double)(numberHorizontalDotes - 1);
     }
 
     private void setOffsetOfVertical() {
-        offsetOfVertical = Math.abs(highBorder - lowerBorder) / (double)(numberVerticalDotes);
+        offsetOfVertical = Math.abs(highBorder - lowerBorder) / (double)(numberVerticalDotes - 1);
     }
 
     private void setOffsetOfKeyValue() {
@@ -137,56 +124,28 @@ public class GridFunction {
         return numberHorizontalDotes;
     }
 
-    public void setNumberHorizontalDotes(int numberHorizontalDotes) {
-        this.numberHorizontalDotes = numberHorizontalDotes;
-    }
-
     public int getNumberVerticalDotes() {
         return numberVerticalDotes;
-    }
-
-    public void setNumberVerticalDotes(int numberVerticalDotes) {
-        this.numberVerticalDotes = numberVerticalDotes;
     }
 
     public int getNumberOfKeyValues() {
         return numberOfKeyValues;
     }
 
-    public void setNumberOfKeyValues(int numberOfKeyValues) {
-        this.numberOfKeyValues = numberOfKeyValues;
-    }
-
     public double getRightBorder() {
         return rightBorder;
-    }
-
-    public void setRightBorder(int rightBorder) {
-        this.rightBorder = rightBorder;
     }
 
     public double getLeftBorder() {
         return leftBorder;
     }
 
-    public void setLeftBorder(int leftBorder) {
-        this.leftBorder = leftBorder;
-    }
-
     public double getHighBorder() {
         return highBorder;
     }
 
-    public void setHighBorder(int highBorder) {
-        this.highBorder = highBorder;
-    }
-
     public double getLowerBorder() {
         return lowerBorder;
-    }
-
-    public void setLowerBorder(int lowerBorder) {
-        this.lowerBorder = lowerBorder;
     }
 
     public double getOffsetOfHorizontal() {

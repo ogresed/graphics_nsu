@@ -13,6 +13,7 @@ import java.awt.event.KeyEvent;
 import static javax.swing.JOptionPane.showMessageDialog;
 
 public class Properties extends JFrame {
+    private final static char ARROW = (char) 65535;
     private final static String WRONG_VALUES = "Wrong values";
     private final static String CORRECT_VALUES = "Correct values";
     private final static int MAX_AMPLITUDE = 400;
@@ -94,6 +95,9 @@ public class Properties extends JFrame {
         field.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
+                if (e.getKeyChar() == ARROW) {
+                    return;
+                }
                 checkValueInField(changerValue);
             }
         });
@@ -115,9 +119,8 @@ public class Properties extends JFrame {
         }
         else {
             changing.getSlider().setValue(value);
-            changing.getField().setText(String.valueOf(value));
-            changing.setCorrect(true);
             changing.setNewValue(value);
+            changing.setCorrect(true);
             infoLabel.setText(CORRECT_VALUES);
         }
     }
@@ -141,15 +144,24 @@ public class Properties extends JFrame {
                     "WARNING", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        int leftValue = left.getNewValue(), rightValue = right.getNewValue(),
-                low = lower.getNewValue(), height = high.getNewValue();
+        int leftValue = left.getNewValue(),
+                rightValue = right.getNewValue(),
+                low = lower.getNewValue(),
+                height = high.getNewValue();
         if(configuration.getGridFunction().needUpdate(leftValue, rightValue, low, height)) {
-            GridFunction function = new GridFunction(left.getNewValue(), right.getNewValue(),
-                    lower.getNewValue(), high.getNewValue());
+            GridFunction function = new GridFunction(
+                    left.getNewValue(),
+                    right.getNewValue(),
+                    lower.getNewValue(),
+                    high.getNewValue());
             configuration.setFunction(function);
+            mainPanel.createAllIsolines(function);
         }
-        configuration.setGrid(xSize.getNewValue(), ySize.getNewValue());
-        mainPanel.createImage();
+        else {
+            configuration.setGrid(xSize.getNewValue(), ySize.getNewValue());
+            mainPanel.createAllIsolines(configuration.getGridFunction());
+            mainPanel.createImage();
+        }
         setVisible(false);
     }
 
@@ -159,7 +171,7 @@ public class Properties extends JFrame {
                 xSize.isCorrect() && ySize.isCorrect();
     }
     public void setGrid(int xSizeVal, int ySizeVal) {
-        xSize.setNewValue(xSizeVal);
-        ySize.setNewValue(ySizeVal);
+        xSize.setValue(xSizeVal);
+        ySize.setValue(ySizeVal);
     }
 }

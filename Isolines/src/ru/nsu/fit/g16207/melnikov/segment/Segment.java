@@ -22,24 +22,36 @@ public class Segment {
     /**
      * this function return true if level crosses line
      * */
-    public void indicateCrossDot(double level) {
-        // true if don't crosses
-        boolean returnValue = level > f1 && level > f2 ||
-                level < f1 && level < f2;
-        if(!returnValue) {
-            double small = f1 < f2 ? f1 : f2;
-            double attitude = (level - small) / Math.abs(f2 - f1);
+    public Segment indicateCrossDot(double level) {
+        boolean returnValue = crosses(level);
+        if(returnValue) {
+            double attitude = Math.abs((level - f1) / (f2 - f1));
             if(x1 == x2) {
-                crossOrdinate = Math.abs(y2 -y1) * attitude;
+                crossOrdinate = (y2 -y1) * attitude + y1;
                 crossAbscissa = x1;
             }
             else if (y1 == y2) {
-                crossAbscissa = Math.abs(x2 -x1) * attitude;
+                crossAbscissa = (x2 -x1) * attitude + x1;
                 crossOrdinate = y1;
             }
         }
         crossed = returnValue;
+        return this;
     }
+    // true if crosses
+    public boolean crosses(double level) {
+        return !(level > f1 && level > f2 ||
+                level < f1 && level < f2);
+    }
+
+    public double getF1() {
+        return f1;
+    }
+
+    public double getF2() {
+        return f2;
+    }
+
     public boolean isCrossed() {
         return crossed;
     }

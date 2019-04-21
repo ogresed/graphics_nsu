@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class Configuration {
     private static final int MAX_GRID_SIZE = 100;
-    private static final int MIN_GRID_SIZE = 4;
+    private static final int MIN_GRID_SIZE = 5;
     private static final int MAX_VALUES_NUMBER = 100;
     private static final int MIN_VALUES_NUMBER = 1;
     private Color colors[];
@@ -97,6 +97,7 @@ public class Configuration {
 
     public void setFunction(GridFunction function) {
         this.function = function;
+        createValues(xSize, ySize, valuesNumber);
     }
     public void setGrid(int xS, int yS) {
         createValues(xS, yS, valuesNumber);
