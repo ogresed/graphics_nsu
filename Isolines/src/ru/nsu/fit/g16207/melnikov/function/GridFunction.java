@@ -5,18 +5,18 @@ public class GridFunction {
     private double maxFunction;
     private double[][] values;
     private double[] keyValues;
-    private int numberOfKeyValues;//n
+    private int numberOfKeyValues;
 
     private double offsetOfKeyValue;
     private double offsetOfHorizontal;
     private double offsetOfVertical;
     //changeable parameters
-    private int numberHorizontalDotes = 10;//k
-    private int numberVerticalDotes = 10;//m
-    private double leftBorder;//a
-    private double rightBorder;//b
-    private double lowerBorder;//c
-    private double highBorder;//d
+    private int numberHorizontalDotes;
+    private int numberVerticalDotes;
+    private double leftBorder;
+    private double rightBorder;
+    private double lowerBorder;
+    private double highBorder;
     private Function function;
 
     public GridFunction(double leftBorder, double rightBorder, double lowerBorder, double highBorder) {
@@ -27,7 +27,7 @@ public class GridFunction {
         function =  new Function(leftBorder, rightBorder, lowerBorder, highBorder) {
             @Override
             public double function(double x, double y) {
-                return x*y;
+                return x * y / 40;
             }
         };
     }

@@ -6,14 +6,14 @@ public abstract class Function {
     private double Ymin;
     private double Ymax;
 
-    public Function(double xmin, double xmax, double ymin, double ymax) {
+    Function(double xmin, double xmax, double ymin, double ymax) {
         Xmin = xmin;
         Xmax = xmax;
         Ymin = ymin;
         Ymax = ymax;
     }
 
-    public Function() {
+    protected Function() {
 
     }
 
@@ -21,16 +21,8 @@ public abstract class Function {
         return Xmin;
     }
 
-    public void setXmin(double xmin) {
-        Xmin = xmin;
-    }
-
     public double getXmax() {
         return Xmax;
-    }
-
-    public void setXmax(double xmax) {
-        Xmax = xmax;
     }
 
     public double getYmin() {

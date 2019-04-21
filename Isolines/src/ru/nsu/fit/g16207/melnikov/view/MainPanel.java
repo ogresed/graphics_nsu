@@ -205,7 +205,7 @@ public class MainPanel extends JPanel {
             x+=xOffset;
         }
         for(int i = 0; i  < ySize; i++) {
-            int pixelY = toPixel(y, heightOfImage, function.getLowerBorder(), function.getRightBorder());
+            int pixelY = toPixel(y, heightOfImage, function.getLowerBorder(), function.getHighBorder());
             g.drawLine(0, pixelY, widthOfImage - 1, pixelY);
             y+=yOffset;
         }

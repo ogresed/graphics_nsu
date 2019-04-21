@@ -33,7 +33,6 @@ public class MainFrame extends JFrame {
         int height = Main.multiplyByFraction(6, 7, dimension.height);
         setBounds((dimension.width - width) / 2, (dimension.height - height) / 2, width, height);
         setTitle("Isolines");
-        //setLayout(new GridLayout(2, 1));
         //create menu
         menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -46,7 +45,7 @@ public class MainFrame extends JFrame {
         //create status bar
         StatusBar statusBar = new StatusBar();
         //create main panel
-        configuration = new Configuration(new GridFunction(-400, 5, -5, 5));
+        configuration = new Configuration(new GridFunction(-10, 3, -4, 10));
         panel = new MainPanel(configuration, statusBar);
         properties =  new Properties(panel, configuration);
         //adding
