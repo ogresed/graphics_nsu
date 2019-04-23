@@ -134,6 +134,7 @@ public class MainPanel extends JPanel {
             repaint();
         }
         if(enteringDot) {
+            createPixelSegments();
             for(PixelSegment segment : pixelSegments) {
                 drawEndsOfSegment(segment, g);
             }
