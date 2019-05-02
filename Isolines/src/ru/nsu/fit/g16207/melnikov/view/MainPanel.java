@@ -69,9 +69,18 @@ public class MainPanel extends JPanel {
     }
 
     class MyMouseAdapter extends MouseAdapter {
+        double draggedValue;
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            draggedValue = getValueByCoordinate(e.getX(), e.getY());
+        }
+
         @Override
         public void mouseDragged(MouseEvent e) {
-            event(e.getX(), e.getY());
+            levels.remove(draggedValue);
+            draggedValue = getValueByCoordinate(e.getX(), e.getY());
+            levels.add(draggedValue);
         }
 
         @Override
@@ -89,19 +98,23 @@ public class MainPanel extends JPanel {
         }
 
         @Override
-        public void mousePressed(MouseEvent e) {
+        public void mouseReleased(MouseEvent e) {
             event(e.getX(), e.getY());
         }
 
         private void event(int x, int y) {
             if(levels != null && isolines && !(x > widthOfImage || y > heightOfImage)) {
-                GridFunction gridFunction = configuration.getGridFunction();
-                double xF = getValueFromRasterToArea(
-                        x, widthOfImage, gridFunction.getLeftBorder(), gridFunction.getRightBorder());
-                double yF = getValueFromRasterToArea(
-                        y, heightOfImage, gridFunction.getLowerBorder(), gridFunction.getHighBorder());
-                levels.add(gridFunction.getFunction().function(xF, yF));
+                levels.add(getValueByCoordinate(x, y));
             }
+        }
+
+        private double getValueByCoordinate(int x, int y) {
+            GridFunction gridFunction = configuration.getGridFunction();
+            double xF = getValueFromRasterToArea(
+                    x, widthOfImage, gridFunction.getLeftBorder(), gridFunction.getRightBorder());
+            double yF = getValueFromRasterToArea(
+                    y, heightOfImage, gridFunction.getLowerBorder(), gridFunction.getHighBorder());
+            return gridFunction.getFunction().function(xF, yF);
         }
     }
 
