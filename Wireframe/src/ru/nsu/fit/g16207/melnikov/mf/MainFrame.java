@@ -1,21 +1,35 @@
 package ru.nsu.fit.g16207.melnikov.mf;
 
+import ru.nsu.fit.g16207.melnikov.Model;
+import ru.nsu.fit.g16207.melnikov.view.SettingsDialog;
+import ru.nsu.fit.g16207.melnikov.view.ShapeView;
+import ru.nsu.fit.g16207.melnikov.matrix.Matrix;
 import ru.nsu.fit.g16207.melnikov.mf.baseframe.BaseFrame;
-import ru.nsu.fit.g16207.melnikov.settings.Settings;
+import ru.nsu.fit.g16207.melnikov.model_loader.ModelLoader;
+import ru.nsu.fit.g16207.melnikov.model_loader.ModelSaver;
+import ru.nsu.fit.g16207.melnikov.universal_parser.NoObjectFactoryException;
+import ru.nsu.fit.g16207.melnikov.universal_parser.ParserException;
+import ru.nsu.fit.g16207.melnikov.universal_parser.TypeConversionException;
+import ru.nsu.fit.g16207.melnikov.universal_parser.TypeMatchingException;
 import ru.nsu.fit.g16207.melnikov.utils.MathUtil;
-import ru.nsu.fit.g16207.melnikov.view.MainPanel;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
 public class MainFrame extends BaseFrame {
-    private MainPanel panel;
-    private Settings settings;
+    private static final String DATA_FOLDER = "FIT_16207_Melnikov_Wireframe_Data";
     private final String ABOUT = "Init, version 1.0\nCopyright" +
             "  2019 Sergey Melnikov, FIT, group 16207";
+    private Model model;
+    private static final int DEFAULT_WIDTH = 1024;
+    private static final int DEFAULT_HEIGHT = 800;
+    private final ShapeView shapeView = new ShapeView(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     public MainFrame() {
         super(JFrame.EXIT_ON_CLOSE, "Wireframe");
         setResizable(false);
@@ -28,20 +42,37 @@ public class MainFrame extends BaseFrame {
         //create buttons
         createButtons();
         //set components
-        StatusBar bar = new StatusBar();
-        panel = new MainPanel(bar);
-        add(panel, BorderLayout.CENTER);
-        add(bar, BorderLayout.SOUTH);
-        settings = new Settings(this);
+        JPanel mainFrameJPanel = new JPanel();
+        shapeView.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (!shapeView.hasFocus()) {
+                    shapeView.requestFocus();
+                } else {
+                    shapeView.transferFocus();
+                }
+            }
+        });
+
+        shapeView.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                super.focusLost(e);
+            }
+        });
+        add(mainFrameJPanel);
+        mainFrameJPanel.add(shapeView);
+
         setVisible(true);
         revalidate();
     }
 
     private ActionListener exitListener = e -> System.exit(0);
-    private ActionListener openListener = e -> {};
-    private ActionListener saveListener = e -> {};
-    private ActionListener initListener = e -> {};
-    private ActionListener settingsListener = e -> settings.setVisible(true);
+    private ActionListener openListener = e -> onOpenButtonClick();
+    private ActionListener saveListener = e -> onSaveButtonClick();
+    private ActionListener initListener = e -> onInitButtonClick();
+    private ActionListener settingsListener = e -> onSettingButtonClick();
     private ActionListener aboutListener = e -> showMessageDialog(this, ABOUT,
             "About Init", JOptionPane.INFORMATION_MESSAGE);
 
@@ -59,4 +90,76 @@ public class MainFrame extends BaseFrame {
         JMenu about = makeMenu("About", 'B');
         createAction(about, "pictures/About.png", aboutListener,'A', "About this application");
     }
+
+    private void onOpenButtonClick() {
+        JFileChooser jFileChooser = new JFileChooser();
+
+        FileNameExtensionFilter modelFilter = new FileNameExtensionFilter("*.txt", "txt");
+        jFileChooser.addChoosableFileFilter(modelFilter);
+        jFileChooser.setCurrentDirectory(new File(DATA_FOLDER));
+
+        int result = jFileChooser.showOpenDialog(this);
+
+        if (JFileChooser.APPROVE_OPTION == result) {
+            try {
+                loadModel(jFileChooser.getSelectedFile());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(),
+                        "Can't open file", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public void loadModel(File file) throws NoObjectFactoryException, TypeConversionException, TypeMatchingException, ParserException {
+        ModelLoader modelLoader = new ModelLoader(file);
+        this.model = modelLoader.getModel();
+        shapeView.setModel(model);
+
+        if (!model.getbSplines().isEmpty()) {
+            shapeView.setSelectedShape(0);
+        }
+    }
+
+    private void onSaveButtonClick() {
+        JFileChooser saveFileChooser = new JFileChooser();
+        saveFileChooser.setCurrentDirectory(new File(DATA_FOLDER));
+        FileNameExtensionFilter fileNameExtensionFilter = new FileNameExtensionFilter("*.txt", "txt");
+        saveFileChooser.setFileFilter(fileNameExtensionFilter);
+        int returnVal = saveFileChooser.showSaveDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            try {
+                ModelSaver.saveModel(saveFileChooser.getSelectedFile(), model);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error", "Can't save. Reason: " + e.getMessage(),
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+
+    }
+
+    private void onInitButtonClick() {
+        if (null != model) {
+            shapeView.setSceneRotationMatrix(new Matrix(new double[][] {
+                    {1, 0, 0, 0},
+                    {0, 1, 0, 0},
+                    {0, 0, 1, 0},
+                    {0, 0, 0, 1}
+            }));
+            shapeView.update();
+        }
+    }
+
+    private void onSettingButtonClick() {
+        if (null != model) {
+            Integer selectedShape = shapeView.getSelectedShape();
+            SettingsDialog settingsDialog = new SettingsDialog(this, "Settings", -1, model, selectedShape);
+            settingsDialog.setVisible(true);
+
+            shapeView.setSelectedShape(settingsDialog.getSelectedShape());
+            shapeView.update();
+        }
+    }
+
 }
