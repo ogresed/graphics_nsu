@@ -23,7 +23,7 @@ public class BSpline {
         this.points = points;
     }
 
-    public void addPoint(ru.nsu.fit.g16207.melnikov.Point<Double, Double> point) {
+    public void addPoint(Point<Double, Double> point) {
         points.add(point);
     }
 

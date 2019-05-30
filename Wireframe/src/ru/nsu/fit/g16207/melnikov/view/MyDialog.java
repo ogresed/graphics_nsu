@@ -11,11 +11,7 @@ public abstract class MyDialog extends JDialog {
     private static final String CANCEL = "Cancel";
     private boolean isCancelled = true;
 
-    public MyDialog(JFrame jFrame, String title, int rowForOkAndCancelButtons) {
-        this(jFrame, title, null, rowForOkAndCancelButtons);
-    }
-
-    public MyDialog(JFrame jFrame, String title, HashMap<String, Object> args, int rowForOkAndCancelButtons) {
+    MyDialog(JFrame jFrame, String title, HashMap<String, Object> args, int rowForOkAndCancelButtons) {
         super(jFrame, title, true);
 
         GridBagLayout gridBagLayout = new GridBagLayout();
@@ -29,15 +25,15 @@ public abstract class MyDialog extends JDialog {
         pack();
     }
 
-    protected void addComponent(int row, int column, JComponent jComponent) {
+    private void addComponent(int row, int column, JComponent jComponent) {
         addComponent(row, column, 1, 1, jComponent);
     }
 
-    protected void addComponent(int row, int column, int width, int height, JComponent jComponent) {
+    void addComponent(int row, int column, int width, int height, JComponent jComponent) {
         addComponent(row, column, width, height, GridBagConstraints.NONE, jComponent);
     }
 
-    protected void addComponent(int row, int column, int width, int height, int fill, JComponent jComponent) {
+    private void addComponent(int row, int column, int width, int height, int fill, JComponent jComponent) {
         GridBagConstraints constraints = new GridBagConstraints();
 
         Insets insets = new Insets(5, 10, 5, 10);
@@ -77,10 +73,6 @@ public abstract class MyDialog extends JDialog {
             isCancelled = false;
             setVisible(false);
         });
-    }
-
-    public boolean isCancelled() {
-        return isCancelled;
     }
 
     protected abstract void onDialogCreated(HashMap<String, Object> propertyResourceBundle);

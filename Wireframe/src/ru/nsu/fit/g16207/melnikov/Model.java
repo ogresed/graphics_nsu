@@ -20,7 +20,7 @@ public class Model {
     private double sh;
     private Matrix roundMatrix;
     private Color backgroundColor;
-    private final ArrayList<BSpline> bSplines = new ArrayList<>();
+    private BSpline bSpline;
 
     public Model() {
 
@@ -97,7 +97,7 @@ public class Model {
     }
 
     public void addShape(BSpline BSpline) {
-        bSplines.add(BSpline);
+        bSpline = BSpline;
     }
 
     public int getN() {
@@ -152,11 +152,11 @@ public class Model {
         return backgroundColor;
     }
 
-    public ArrayList<BSpline> getbSplines() {
-        return bSplines;
+    public BSpline getbSpline() {
+        return bSpline;
     }
 
     public boolean isEmpty() {
-        return getbSplines().isEmpty();
+        return bSpline == null;
     }
 }

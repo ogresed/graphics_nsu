@@ -3,7 +3,6 @@ package ru.nsu.fit.g16207.melnikov.mf.baseframe;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.io.File;
 
 public abstract class BaseFrame extends JFrame {
     private JMenuBar menuBar;
@@ -71,22 +70,5 @@ public abstract class BaseFrame extends JFrame {
         string = tmp[tmp.length - 1];
         tmp = string.split("[.]");
         return tmp[0];
-    }
-
-    private void openFile(File file) {
-
-    }
-
-    private String[] stringsWithoutSpacesSeparatedCommentSymbol(String s) {
-        return s.replaceAll(" {4}", " ").
-                replaceAll("[\\s]{2,}", " ").
-                split("//");
-    }
-
-    protected File getOpenFileName() {
-        return FileUtils.getOpenFileName(this, "txt", "Text file");
-    }
-    protected File getSaveFileName () {
-        return FileUtils.getSaveFileName(this, "txt", "Text file");
     }
 }

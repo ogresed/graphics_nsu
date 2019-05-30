@@ -13,7 +13,7 @@ public class BSplineBuilder {
     private Double cy = null;
     private Double cz = null;
     private Matrix roundMatrix = null;
-    private final ArrayList<ru.nsu.fit.g16207.melnikov.Point<Double, Double>> points = new ArrayList<>();
+    private final ArrayList<Point<Double, Double>> points = new ArrayList<>();
 
     public BSplineBuilder() {
 

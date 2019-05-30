@@ -1,6 +1,7 @@
 package ru.nsu.fit.g16207.melnikov.mf;
 
 import ru.nsu.fit.g16207.melnikov.Model;
+import ru.nsu.fit.g16207.melnikov.mf.baseframe.FileUtils;
 import ru.nsu.fit.g16207.melnikov.view.SettingsDialog;
 import ru.nsu.fit.g16207.melnikov.view.ShapeView;
 import ru.nsu.fit.g16207.melnikov.matrix.Matrix;
@@ -14,7 +15,6 @@ import ru.nsu.fit.g16207.melnikov.universal_parser.TypeMatchingException;
 import ru.nsu.fit.g16207.melnikov.utils.MathUtil;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -46,7 +46,6 @@ public class MainFrame extends BaseFrame {
         shapeView.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
                 if (!shapeView.hasFocus()) {
                     shapeView.requestFocus();
                 } else {
@@ -92,22 +91,12 @@ public class MainFrame extends BaseFrame {
     }
 
     private void onOpenButtonClick() {
-        JFileChooser jFileChooser = new JFileChooser();
-
-        FileNameExtensionFilter modelFilter = new FileNameExtensionFilter("*.txt", "txt");
-        jFileChooser.addChoosableFileFilter(modelFilter);
-        jFileChooser.setCurrentDirectory(new File(DATA_FOLDER));
-
-        int result = jFileChooser.showOpenDialog(this);
-
-        if (JFileChooser.APPROVE_OPTION == result) {
             try {
-                loadModel(jFileChooser.getSelectedFile());
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(),
-                        "Can't open file", JOptionPane.ERROR_MESSAGE);
+                loadModel(FileUtils.getOpenFileName(this, "txt", "Text file"));
+            } catch (NullPointerException ignore) {
+            } catch (NoObjectFactoryException | TypeConversionException | ParserException | TypeMatchingException e) {
+                System.out.println("Impossible to open file");
             }
-        }
     }
 
     public void loadModel(File file) throws NoObjectFactoryException, TypeConversionException, TypeMatchingException, ParserException {
@@ -115,28 +104,20 @@ public class MainFrame extends BaseFrame {
         this.model = modelLoader.getModel();
         shapeView.setModel(model);
 
-        if (!model.getbSplines().isEmpty()) {
+        if (!model.getbSpline().isEmpty()) {
             shapeView.setSelectedShape(0);
         }
     }
 
     private void onSaveButtonClick() {
-        JFileChooser saveFileChooser = new JFileChooser();
-        saveFileChooser.setCurrentDirectory(new File(DATA_FOLDER));
-        FileNameExtensionFilter fileNameExtensionFilter = new FileNameExtensionFilter("*.txt", "txt");
-        saveFileChooser.setFileFilter(fileNameExtensionFilter);
-        int returnVal = saveFileChooser.showSaveDialog(this);
-
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {
-                ModelSaver.saveModel(saveFileChooser.getSelectedFile(), model);
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Error", "Can't save. Reason: " + e.getMessage(),
-                        JOptionPane.ERROR_MESSAGE);
-            }
+        try {
+            ModelSaver.saveModel(FileUtils.getSaveFileName(this, "txt", "Text file"),
+                    model);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error", "Can't save. Reason: "
+                            + e.getMessage(),
+                    JOptionPane.ERROR_MESSAGE);
         }
-
-
     }
 
     private void onInitButtonClick() {
@@ -154,9 +135,9 @@ public class MainFrame extends BaseFrame {
     private void onSettingButtonClick() {
         if (null != model) {
             Integer selectedShape = shapeView.getSelectedShape();
-            SettingsDialog settingsDialog = new SettingsDialog(this, "Settings", -1, model, selectedShape);
+            SettingsDialog settingsDialog = new SettingsDialog(this, "Settings", -1,
+                    model, selectedShape);
             settingsDialog.setVisible(true);
-
             shapeView.setSelectedShape(settingsDialog.getSelectedShape());
             shapeView.update();
         }

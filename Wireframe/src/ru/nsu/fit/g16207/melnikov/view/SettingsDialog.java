@@ -8,11 +8,7 @@ import ru.nsu.fit.g16207.melnikov.matrix.Matrix;
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 public class SettingsDialog extends MyDialog {
     private static final String MODEL_KEY = "MODEL_KEY";
@@ -21,7 +17,7 @@ public class SettingsDialog extends MyDialog {
     private static final int HEIGHT = 300;
     private static final float SCALE_RATE_PLUS = 1.1f;
     private static final float SCALE_RATE_MINUS = 0.9f;
-    private static final int DEFAILT_COLUMN_COUNT = 3;
+    private static final int DEFAULT_COLUMN_COUNT = 3;
 
     private SplineGraphic splineGraphic;
 
@@ -57,19 +53,19 @@ public class SettingsDialog extends MyDialog {
         selectedShape = (Integer) propertyResourceBundle.get(SELECTED_SHAPE_KEY);
         splineGraphic = new SplineGraphic(WIDTH, HEIGHT, model.getA(), model.getB());
         if (null != selectedShape) {
-            BSpline BSpline = model.getbSplines().get(selectedShape);
+            BSpline BSpline = model.getbSpline();
             splineGraphic.setBSpline(BSpline);
         }
 
-        nSpinner = new JSpinner(new SpinnerNumberModel(10, 3, 100, 1));
+        nSpinner = new JSpinner(new SpinnerNumberModel(10, 5, 100, 1));
         nSpinner.addChangeListener(e -> model.setN(((Number) nSpinner.getValue()).intValue()));
 
-        mSpinner = new JSpinner(new SpinnerNumberModel(10, 3, 100, 1));
+        mSpinner = new JSpinner(new SpinnerNumberModel(10, 5, 100, 1));
         mSpinner.addChangeListener( e -> model.setM(((Number) mSpinner.getValue()).intValue()));
 
         kSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
         kSpinner.addChangeListener(e -> model.setK(((Number) kSpinner.getValue()).intValue()));
-
+    
         rColorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 255, 1));
 
         ChangeListener changeColorListener = e -> {
@@ -77,7 +73,7 @@ public class SettingsDialog extends MyDialog {
                 int newR = ((Number) rColorSpinner.getValue()).intValue();
                 int newG = ((Number) gColorSpinner.getValue()).intValue();
                 int newB = ((Number) bColorSpinner.getValue()).intValue();
-                model.getbSplines().get(selectedShape).setColor(new Color(newR, newG, newB));
+                model.getbSpline().setColor(new Color(newR, newG, newB));
             }
         };
         rColorSpinner.addChangeListener(changeColorListener);
@@ -113,8 +109,8 @@ public class SettingsDialog extends MyDialog {
             splineGraphic.setNewEndLength(bFloatValue);
         });
 
-        ((JSpinner.DefaultEditor) aSpinner.getEditor()).getTextField().setColumns(DEFAILT_COLUMN_COUNT);
-        ((JSpinner.DefaultEditor) bSpinner.getEditor()).getTextField().setColumns(DEFAILT_COLUMN_COUNT);
+        ((JSpinner.DefaultEditor) aSpinner.getEditor()).getTextField().setColumns(DEFAULT_COLUMN_COUNT);
+        ((JSpinner.DefaultEditor) bSpinner.getEditor()).getTextField().setColumns(DEFAULT_COLUMN_COUNT);
 
         cSpinner = new JSpinner(new SpinnerNumberModel(10, 0, 360, 1));
         dSpinner = new JSpinner(new SpinnerNumberModel(10, 0, 360, 1));
@@ -174,7 +170,6 @@ public class SettingsDialog extends MyDialog {
         addNewSpinnerLabel(0, 0, "n", nSpinner);
         addNewSpinnerLabel(0, 1, "m", mSpinner);
         addNewSpinnerLabel(0, 2, "k", kSpinner);
-        //addNewSpinnerLabel(0, 3, "№", numSpinner);
         addNewSpinnerLabel(0, 4, "R", rColorSpinner);
 
         addNewSpinnerLabel(1, 0, "a", aSpinner);
@@ -224,7 +219,7 @@ public class SettingsDialog extends MyDialog {
 
     private void updateColorParams(Model model) {
         if (null != selectedShape) {
-            Color currentShapeColor = model.getbSplines().get(selectedShape).getColor();
+            Color currentShapeColor = model.getbSpline().getColor();
             rColorSpinner.setValue(currentShapeColor.getRed());
             gColorSpinner.setValue(currentShapeColor.getGreen());
             bColorSpinner.setValue(currentShapeColor.getBlue());
@@ -252,29 +247,7 @@ public class SettingsDialog extends MyDialog {
         return value.floatValue();
     }
 
-    private String getShapeName(ArrayList<String> names) {
-        m:
-        for (int i = 0; ;++i) {
-            for (String name : names) {
-                if (name.equals("BSpline " + i)) {
-                    continue m;
-                }
-            }
-
-            return "BSpline " + i;
-        }
-    }
-
     public Integer getSelectedShape() {
         return selectedShape;
-    }
-
-    private Color getRandomColor() {
-        Random random = new Random();
-        int r = random.nextInt(256);
-        int g = random.nextInt(256);
-        int b = random.nextInt(256);
-
-        return new Color(r, g, b);
     }
 }

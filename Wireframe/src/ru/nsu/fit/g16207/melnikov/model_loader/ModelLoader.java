@@ -21,7 +21,8 @@ public class ModelLoader {
 
     private final Model model = new Model();
 
-    public ModelLoader(File file) throws TypeConversionException, NoObjectFactoryException, TypeMatchingException, ParserException {
+    public ModelLoader(File file)
+            throws TypeConversionException, NoObjectFactoryException, TypeMatchingException, ParserException {
         Matrix matrix = new Matrix(new double[4][4]);
         model.setRoundMatrix(matrix);
         final IntegerWrapper rowCountForMatrix = new IntegerWrapper(0);

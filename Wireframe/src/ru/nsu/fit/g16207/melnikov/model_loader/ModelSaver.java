@@ -36,30 +36,30 @@ public class ModelSaver {
                     + backgroundColor.getBlue());
 
             outputStreamWriter.write('\n');
-            outputStreamWriter.write(model.getbSplines().size() + "");
+            outputStreamWriter.write("1");
             outputStreamWriter.write('\n');
 
-            for (BSpline bSpline : model.getbSplines()) {
-                Color color = bSpline.getColor();
-                outputStreamWriter.write(color.getRed() + " " + color.getGreen() + " " + color.getBlue());
-                outputStreamWriter.write('\n');
-                outputStreamWriter.write(bSpline.getCx() + " " + bSpline.getCy() + " " + bSpline.getCz());
-                outputStreamWriter.write('\n');
+            BSpline bSpline = model.getbSpline();
+            Color color = bSpline.getColor();
+            outputStreamWriter.write(color.getRed() + " " + color.getGreen() + " " + color.getBlue());
+            outputStreamWriter.write('\n');
+            outputStreamWriter.write(bSpline.getCx() + " " + bSpline.getCy() + " " + bSpline.getCz());
+            outputStreamWriter.write('\n');
 
-                Matrix shapeMatrix = bSpline.getRoundMatrix();
-                for (int i = 0; i < 3; ++i) {
-                    outputStreamWriter.write(shapeMatrix.get(i, 0) + " " + shapeMatrix.get(i, 1) + " " + shapeMatrix.get(i, 2));
-                    outputStreamWriter.write('\n');
-                }
-
-                outputStreamWriter.write(bSpline.getPoints().size() + "");
+            Matrix shapeMatrix = bSpline.getRoundMatrix();
+            for (int i = 0; i < 3; ++i) {
+                outputStreamWriter.write(shapeMatrix.get(i, 0) + " " + shapeMatrix.get(i, 1) + " " + shapeMatrix.get(i, 2));
                 outputStreamWriter.write('\n');
-
-                for (Point<Double, Double> point : bSpline.getPoints()) {
-                    outputStreamWriter.write(point.getX() + " " + point.getY());
-                    outputStreamWriter.write('\n');
-                }
             }
+
+            outputStreamWriter.write(bSpline.getPoints().size() + "");
+            outputStreamWriter.write('\n');
+
+            for (Point<Double, Double> point : bSpline.getPoints()) {
+                outputStreamWriter.write(point.getX() + " " + point.getY());
+                outputStreamWriter.write('\n');
+            }
+        } catch (NullPointerException ignore) {
         }
     }
 }
