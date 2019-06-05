@@ -15,8 +15,8 @@ public class SettingsDialog extends MyDialog {
     private static final String SELECTED_SHAPE_KEY = "SELECTED_SHAPE_KEY";
     private static final int WIDTH = 600;
     private static final int HEIGHT = 300;
-    private static final float SCALE_RATE_PLUS = 1.1f;
-    private static final float SCALE_RATE_MINUS = 0.9f;
+    private static final double SCALE_RATE_PLUS = 1.1;
+    private static final double SCALE_RATE_MINUS = 0.9;
     private static final int DEFAULT_COLUMN_COUNT = 3;
 
     private SplineGraphic splineGraphic;
@@ -80,38 +80,38 @@ public class SettingsDialog extends MyDialog {
         bColorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 255, 1));
         bColorSpinner.addChangeListener(changeColorListener);
         aSpinner = new JSpinner(new SpinnerNumberModel(0.1, -0.01, 1.01, 0.05));
-        bSpinner = new JSpinner(new SpinnerNumberModel(0.1, -0.01, 1.01, 0.05));
+        bSpinner = new JSpinner(new SpinnerNumberModel(1.0, -0.01, 1.01, 0.05));
 
         aSpinner.addChangeListener(e -> {
-            float aFloatValue = getValueOfSpinner(aSpinner);
-            float bFloatValue = getValueOfSpinner(bSpinner);
+            double aDoubleValue = getValueOfSpinner(aSpinner);
+            double bDoubleValue = getValueOfSpinner(bSpinner);
 
-            if (aFloatValue > bFloatValue) {
-                aFloatValue = bFloatValue;
-                aSpinner.setValue(aFloatValue);
+            if (aDoubleValue > bDoubleValue) {
+                aDoubleValue = bDoubleValue;
+                aSpinner.setValue(aDoubleValue);
             }
 
-            model.setA(aFloatValue);
-            splineGraphic.setNewStartLength(aFloatValue);
+            model.setA(aDoubleValue);
+            splineGraphic.setNewStartLength(aDoubleValue);
         });
 
         bSpinner.addChangeListener(e -> {
-            float aFloatValue = getValueOfSpinner(aSpinner);
-            float bFloatValue = getValueOfSpinner(bSpinner);
+            double aDoubleValue = getValueOfSpinner(aSpinner);
+            double bDoubleValue = getValueOfSpinner(bSpinner);
 
-            if (aFloatValue > bFloatValue) {
-                bFloatValue = aFloatValue;
-                bSpinner.setValue(bFloatValue);
+            if (aDoubleValue > bDoubleValue) {
+                bDoubleValue = aDoubleValue;
+                bSpinner.setValue(bDoubleValue);
             }
-            model.setB(bFloatValue);
-            splineGraphic.setNewEndLength(bFloatValue);
+            model.setB(bDoubleValue);
+            splineGraphic.setNewEndLength(bDoubleValue);
         });
 
         ((JSpinner.DefaultEditor) aSpinner.getEditor()).getTextField().setColumns(DEFAULT_COLUMN_COUNT);
         ((JSpinner.DefaultEditor) bSpinner.getEditor()).getTextField().setColumns(DEFAULT_COLUMN_COUNT);
 
-        cSpinner = new JSpinner(new SpinnerNumberModel(10, 0, 360, 1));
-        dSpinner = new JSpinner(new SpinnerNumberModel(10, 0, 360, 1));
+        cSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 360, 1));
+        dSpinner = new JSpinner(new SpinnerNumberModel(360, 0, 360, 1));
 
         cSpinner.addChangeListener(e -> {
             int cValue = ((Number) cSpinner.getValue()).intValue();
@@ -138,13 +138,13 @@ public class SettingsDialog extends MyDialog {
         znSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
         znSpinner.addChangeListener(e -> {
             Number znNumber = (Number) znSpinner.getValue();
-            model.setZn(znNumber.floatValue());
+            model.setZn(znNumber.doubleValue());
         });
 
         zfSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
         zfSpinner.addChangeListener(e -> {
             Number zfNumber = (Number) zfSpinner.getValue();
-            model.setZf(zfNumber.floatValue());
+            model.setZf(zfNumber.doubleValue());
         });
 
         shSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
@@ -236,9 +236,9 @@ public class SettingsDialog extends MyDialog {
         addComponent(80 + row * 5, column * 2, 2, 5, jComponent);
     }
 
-    private float getValueOfSpinner(JSpinner jSpinner) {
+    private double getValueOfSpinner(JSpinner jSpinner) {
         Number value = (Number) jSpinner.getValue();
-        return value.floatValue();
+        return value.doubleValue();
     }
 
     public Integer getSelectedShape() {
