@@ -24,7 +24,6 @@ public class SettingsDialog extends MyDialog {
     private JSpinner nSpinner;
     private JSpinner mSpinner;
     private JSpinner kSpinner;
-    //private JSpinner numSpinner;
     private JSpinner rColorSpinner;
     private JSpinner gColorSpinner;
     private JSpinner bColorSpinner;
@@ -37,7 +36,6 @@ public class SettingsDialog extends MyDialog {
     private JSpinner swSpinner;
     private JSpinner shSpinner;
     private Integer selectedShape;
-
 
     public SettingsDialog(JFrame jFrame, String title, int rowForOkAndCancelButtons, Model model, Integer selectedShape) {
         super(jFrame, title, getArgs(model, selectedShape), rowForOkAndCancelButtons);
@@ -57,15 +55,15 @@ public class SettingsDialog extends MyDialog {
             splineGraphic.setBSpline(BSpline);
         }
 
-        nSpinner = new JSpinner(new SpinnerNumberModel(10, 5, 100, 1));
+        nSpinner = new JSpinner(new SpinnerNumberModel(10, 3, 30, 1));
         nSpinner.addChangeListener(e -> model.setN(((Number) nSpinner.getValue()).intValue()));
 
-        mSpinner = new JSpinner(new SpinnerNumberModel(10, 5, 100, 1));
+        mSpinner = new JSpinner(new SpinnerNumberModel(10, 3, 30, 1));
         mSpinner.addChangeListener( e -> model.setM(((Number) mSpinner.getValue()).intValue()));
 
-        kSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
+        kSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 10, 1));
         kSpinner.addChangeListener(e -> model.setK(((Number) kSpinner.getValue()).intValue()));
-    
+
         rColorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 255, 1));
 
         ChangeListener changeColorListener = e -> {
@@ -81,8 +79,8 @@ public class SettingsDialog extends MyDialog {
         gColorSpinner.addChangeListener(changeColorListener);
         bColorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 255, 1));
         bColorSpinner.addChangeListener(changeColorListener);
-        aSpinner = new JSpinner(new SpinnerNumberModel(0.1f, -0.01f, 1.01f, 0.05f));
-        bSpinner = new JSpinner(new SpinnerNumberModel(0.1f, -0.01f, 1.01f, 0.05f));
+        aSpinner = new JSpinner(new SpinnerNumberModel(0.1, -0.01, 1.01, 0.05));
+        bSpinner = new JSpinner(new SpinnerNumberModel(0.1, -0.01, 1.01, 0.05));
 
         aSpinner.addChangeListener(e -> {
             float aFloatValue = getValueOfSpinner(aSpinner);
@@ -123,7 +121,6 @@ public class SettingsDialog extends MyDialog {
                 cValue = dValue;
                 cSpinner.setValue(cValue);
             }
-
             model.setC(cValue);
         });
 
@@ -135,10 +132,8 @@ public class SettingsDialog extends MyDialog {
                 dValue = cValue;
                 dSpinner.setValue(dValue);
             }
-
             model.setD(dValue);
         });
-
 
         znSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
         znSpinner.addChangeListener(e -> {
@@ -214,7 +209,6 @@ public class SettingsDialog extends MyDialog {
         JButton okButton = new JButton("Ok");
         okButton.addActionListener(e -> setVisible(false));
         addNewComponent(3, 3, okButton);
-
     }
 
     private void updateColorParams(Model model) {

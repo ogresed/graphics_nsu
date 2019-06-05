@@ -384,7 +384,6 @@ public class ShapeView extends JPanel {
                 drawLine(splineLine.getStart(), splineLine.getEnd(), model.getbSpline().getColor(), shapeMatrix);
             }
         }
-
         g.drawImage(bufferedImage, 0, 0, null);
     }
 
